@@ -1,0 +1,17 @@
+Project Structure Report - 2026-06-11 09:59:35
+Root Path: C:\Program Files\Ampps\www\Ismano
+Present Directories: public, vendor
+Missing Directories: controllers, helpers, apis, models
+Total Files: 359
+
+File Types:
+  .no_extension: 212
+  .sample: 14
+  .php: 102
+  .bak: 1
+  .json: 1
+  .sql: 5
+  .css: 3
+  .png: 13
+  .js: 1
+  .jpg: 7

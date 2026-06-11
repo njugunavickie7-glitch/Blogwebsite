@@ -7,9 +7,14 @@ $role_id = $_SESSION['role_id'] ?? 0;
 
 // Determine active menu
 function isActive($path, $current_dir, $current_page) {
-    if (strpos($path, $current_dir) !== false) return true;
+    if (strpos($current_dir, $path) !== false) return true;
     if ($current_page == $path) return true;
     return false;
+}
+
+// Check if we're in a store subdirectory
+function isStoreActive($current_dir) {
+    return $current_dir == 'store' || $current_dir == 'categories';
 }
 ?>
 <div class="admin-sidebar">
@@ -55,6 +60,37 @@ function isActive($path, $current_dir, $current_page) {
                 <i class="fas fa-blog"></i>
                 <span>Blog Posts</span>
             </a>
+
+            <!-- Gallery Posts -->
+            <a href="/Ismano/public/admin/gallery/index.php" 
+               class="nav-link <?php echo isActive('gallery', $current_dir, $current_page) ? 'active' : ''; ?>">
+                <i class="fas fa-images"></i>
+                <span>Gallery</span>
+            </a>
+            
+            <!-- STORE SECTION with Dropdown -->
+            <div class="nav-item">
+                <a href="#storeMenu" class="nav-link <?php echo isStoreActive($current_dir) ? 'active' : ''; ?>" 
+                   data-bs-toggle="collapse" role="button" aria-expanded="<?php echo isStoreActive($current_dir) ? 'true' : 'false'; ?>">
+                    <i class="fas fa-store"></i>
+                    <span>Store</span>
+                    <i class="fas fa-chevron-down ms-auto" style="font-size: 12px;"></i>
+                </a>
+                <div class="collapse <?php echo isStoreActive($current_dir) ? 'show' : ''; ?>" id="storeMenu">
+                    <div class="ps-4 mt-2">
+                        <a href="/Ismano/public/admin/store/products/index.php" 
+                           class="nav-link <?php echo $current_dir == 'products' ? 'active' : ''; ?>">
+                            <i class="fas fa-box"></i>
+                            <span>Products</span>
+                        </a>
+                        <a href="/Ismano/public/admin/store/categories/index.php" 
+                           class="nav-link <?php echo $current_dir == 'categories' ? 'active' : ''; ?>">
+                            <i class="fas fa-tags"></i>
+                            <span>Categories</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
             
             <hr>
             
@@ -66,7 +102,8 @@ function isActive($path, $current_dir, $current_page) {
             </a>
             
             <!-- Settings -->
-            <a href="/Ismano/public/admin/settings/index.php" class="nav-link">
+            <a href="/Ismano/public/admin/settings/index.php" 
+               class="nav-link <?php echo isActive('settings', $current_dir, $current_page) ? 'active' : ''; ?>">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
@@ -79,3 +116,71 @@ function isActive($path, $current_dir, $current_page) {
         </div>
     </div>
 </div>
+
+<style>
+/* Sidebar dropdown styles */
+.admin-sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.admin-sidebar .nav-link .fa-chevron-down {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+}
+
+.admin-sidebar .nav-link[aria-expanded="true"] .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.admin-sidebar .collapse .nav-link {
+    padding-left: 35px;
+    font-size: 0.85rem;
+}
+
+.admin-sidebar .collapse .nav-link i {
+    font-size: 0.8rem;
+    width: 20px;
+}
+
+.admin-sidebar .nav-link.active {
+    background: #2a2a2a;
+    color: #fff;
+}
+
+.admin-sidebar .nav-link.active i {
+    color: #fff;
+}
+
+.admin-sidebar .collapse .nav-link.active {
+    background: #2a2a2a;
+    border-left: 3px solid var(--brand-primary, #00A1F3);
+}
+</style>
+
+<script>
+// Store dropdown state in localStorage
+document.addEventListener('DOMContentLoaded', function() {
+    const storeLink = document.querySelector('a[href="#storeMenu"]');
+    const storeMenu = document.getElementById('storeMenu');
+    
+    if (storeLink && storeMenu) {
+        // Load saved state
+        const savedState = localStorage.getItem('storeMenuOpen');
+        if (savedState === 'true') {
+            storeMenu.classList.add('show');
+            storeLink.setAttribute('aria-expanded', 'true');
+        }
+        
+        // Save state when toggled
+        storeLink.addEventListener('click', function(e) {
+            setTimeout(() => {
+                const isOpen = storeMenu.classList.contains('show');
+                localStorage.setItem('storeMenuOpen', isOpen);
+            }, 100);
+        });
+    }
+});
+</script>

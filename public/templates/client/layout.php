@@ -10,6 +10,10 @@ if (!isset($_SESSION['user_id'])) {
 
 $current_page = basename($_SERVER['PHP_SELF']);
 $current_dir = basename(dirname($_SERVER['PHP_SELF']));
+
+// Cart link target — change this if your cart page lives elsewhere.
+$cartUrl = '/Ismano/public/store/cart.php';
+$isCart = strpos($_SERVER['REQUEST_URI'], '/store/cart') !== false;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -268,6 +272,40 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             font-weight: 700;
             color: var(--primary);
         }
+
+        /* ---- Cart count badge (shared across all three nav spots) ---- */
+        .cart-count {
+            background: #e74c3c;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 16px;
+            height: 16px;
+            line-height: 16px;
+            padding: 0 4px;
+            border-radius: 9999px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        }
+        /* Top-bar cart icon */
+        .cart-top {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            color: #1a1a1a;
+            font-size: 20px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .cart-top:hover { color: var(--primary); }
+        .cart-top .cart-count { position: absolute; top: -6px; right: -9px; }
+        /* Sidebar cart count sits at the far right of the row */
+        .sidebar-menu a .cart-count { margin-left: auto; }
+        .sidebar-menu a.active .cart-count { background: #fff; color: var(--primary); }
+        /* Bottom-nav cart icon wrapper so the badge anchors to the icon */
+        .bn-icon { position: relative; display: inline-block; line-height: 1; margin-bottom: 4px; }
+        .bn-icon i { margin-bottom: 0; }
+        .bn-icon .cart-count { position: absolute; top: -9px; right: -11px; }
         
         /* Responsive */
         @media (max-width: 768px) {
@@ -302,6 +340,12 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             </a>
         </li>
         <li>
+            <a href="/Ismano/public/client/cart/index.php" class="<?php echo $isCart ? 'active' : ''; ?>">
+                <i class="fas fa-shopping-cart"></i> Cart
+                <span class="cart-count" style="display:none;">0</span>
+            </a>
+        </li>
+        <li>
             <a href="/Ismano/public/profile/client/index.php" class="<?php echo strpos($_SERVER['REQUEST_URI'], '/profile/client/') !== false ? 'active' : ''; ?>">
                 <i class="fas fa-user-circle"></i> Profile
             </a>
@@ -326,24 +370,34 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             <i class="fas fa-shield-alt"></i> Ismano
         </a>
         
-        <div class="user-dropdown dropdown">
-            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="/Ismano/public/profile/client/index.php">
-                    <i class="fas fa-user me-2"></i> My Profile
-                </a></li>
-                <li><a class="dropdown-item" href="/Ismano/public/client/settings/index.php">
-                    <i class="fas fa-cog me-2"></i> Settings
-                </a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="/Ismano/public/auth/logout.php">
-                    <i class="fas fa-sign-out-alt me-2"></i> Logout
-                </a></li>
-            </ul>
+        <div class="d-flex align-items-center gap-3">
+            <a href="<?php echo htmlspecialchars($cartUrl); ?>" class="cart-top" aria-label="Cart">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" style="display:none;">0</span>
+            </a>
+
+            <div class="user-dropdown dropdown">
+                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="/Ismano/public/profile/client/index.php">
+                        <i class="fas fa-user me-2"></i> My Profile
+                    </a></li>
+                    <li><a class="dropdown-item" href="/Isamano/public/client/cart/index.php">
+                        <i class="fas fa-shopping-cart me-2"></i> My Cart
+                    </a></li>
+                    <li><a class="dropdown-item" href="/Ismano/public/client/settings/index.php">
+                        <i class="fas fa-cog me-2"></i> Settings
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="/Ismano/public/auth/logout.php">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a></li>
+                </ul>
+            </div>
         </div>
     </div>
 </nav>
@@ -376,6 +430,13 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
         <i class="fas fa-tachometer-alt"></i>
         <span>Home</span>
     </a>
+    <a href="<?php echo htmlspecialchars($cartUrl); ?>" class="nav-item <?php echo $isCart ? 'active' : ''; ?>">
+        <span class="bn-icon">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count" style="display:none;">0</span>
+        </span>
+        <span>Cart</span>
+    </a>
     <a href="/Ismano/public/profile/client/index.php" class="nav-item <?php echo strpos($_SERVER['REQUEST_URI'], '/profile/client/') !== false ? 'active' : ''; ?>">
         <i class="fas fa-user-circle"></i>
         <span>Profile</span>
@@ -391,6 +452,34 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Live cart count for every nav spot (top bar, sidebar, bottom nav).
+// Self-contained so it won't clash with the store page's own updateCartCount();
+// all of them update the same .cart-count elements.
+(function () {
+    function applyCount(count) {
+        var n = parseInt(count, 10) || 0;
+        document.querySelectorAll('.cart-count').forEach(function (el) {
+            el.textContent = n > 99 ? '99+' : n;
+            el.style.display = n > 0 ? 'inline-block' : 'none';
+        });
+    }
+    function refreshCart() {
+        fetch('/Ismano/public/api/count.php', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) { if (data && data.success) applyCount(data.count); })
+            .catch(function () { /* leave badges hidden on error */ });
+    }
+    if (document.readyState !== 'loading') {
+        refreshCart();
+    } else {
+        document.addEventListener('DOMContentLoaded', refreshCart);
+    }
+    // Other scripts can refresh after add/remove: window.dispatchEvent(new Event('cart:updated'));
+    window.addEventListener('cart:updated', refreshCart);
+})();
+</script>
 
 <?php if (isset($extra_js)): ?>
     <?php echo $extra_js; ?>

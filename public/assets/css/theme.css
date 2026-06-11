@@ -1,55 +1,57 @@
 /* ============================================================
    assets/css/theme.css
-   Global Design Tokens — Ismano Portfolio
+   Global Design Tokens — ISMAN Company · Engineering Services
    Include this file on EVERY page before any other stylesheet.
 
-   BRAND PALETTE
-     #00A1F3  Sky Blue      — light accent, tints, glows, gradients
-     #0759F8  Royal Blue    — PRIMARY (buttons, links, heroes, active)
-     #EBA94E  Golden Orange — accent (eyebrow tick, highlights)
-     #FFFFFF  White
-     #000000  Black
+   BRAND PALETTE  (engineering / industrial — teal + steel)
+     #0D9488  Teal          — PRIMARY (buttons, links, active, brand)
+     #0A766B  Teal Deep     — hover / pressed
+     #2DD4BF  Cyan          — light accent, glows, progress, data
+     #06342F  Forest        — dark sections (services band, testimonials, footer)
+     #E8902C  Amber         — single warm CTA accent (promo only)
+     #FFFFFF  White · #0A1413 Ink
 
-   WHY royal blue is the primary and sky blue is the "light" accent:
-   white text on #0759F8 passes WCAG AA; #0759F8 text on white also
-   passes AA. Sky #00A1F3 fails contrast both ways, so it is used only
-   for decorative tints/gradients — never as solid fills behind text.
+   Contrast notes: white text on #0D9488 and #06342F pass WCAG AA;
+   #0D9488 text on white passes AA. #2DD4BF is decorative only —
+   never use it as a solid fill behind small text.
    ============================================================ */
 
 /* ── Google Fonts ─────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 /* ── Design Tokens ────────────────────────────────────────── */
 :root {
   /* Brand colours */
-  --color-primary:        #0759F8;   /* royal blue — buttons, links, heroes, active */
-  --color-primary-deep:   #0344C9;   /* darker royal — hover/pressed                */
-  --color-primary-light:  #00A1F3;   /* sky blue — tints, glows, gradients          */
-  --color-accent:         #EBA94E;   /* golden orange — highlights                  */
-  --color-accent-dark:    #D4922F;   /* darker gold on hover                        */
-  --color-secondary:      #081225;   /* deep blue-black — dark sections / footer    */
-  --color-surface:        #FFFFFF;   /* card & section backgrounds                  */
-  --color-surface-alt:    #F4F7FB;   /* subtle cool off-white sections              */
-  --color-border:         #E4EAF2;   /* dividers, card borders                      */
+  --color-primary:        #0D9488;   /* teal — buttons, links, active           */
+  --color-primary-deep:   #0A766B;   /* darker teal — hover/pressed             */
+  --color-primary-light:  #2DD4BF;   /* cyan — tints, glows, data, progress     */
+  --color-accent:         #E8902C;   /* amber — warm CTA accent (promo)         */
+  --color-accent-dark:    #CF7D1F;   /* darker amber on hover                   */
+  --color-secondary:      #06342F;   /* forest green — dark sections / footer   */
+  --color-surface:        #FFFFFF;   /* card & section backgrounds              */
+  --color-surface-alt:    #F1F6F5;   /* subtle cool off-white sections          */
+  --color-surface-mint:   #DFF1ED;   /* light mint band (gallery)               */
+  --color-border:         #E2EAE8;   /* dividers, card borders                  */
 
   /* Text */
-  --color-text-heading:   #0A1320;
-  --color-text-body:      #3D4756;
-  --color-text-muted:     #7C8696;
+  --color-text-heading:   #0A1413;
+  --color-text-body:      #44524F;
+  --color-text-muted:     #7B8987;
   --color-text-inverse:   #FFFFFF;
 
   /* ---- Aliases used by the navbar/footer & layout-rendered pages.
-          Kept identical to the tokens above so BOTH naming schemes
-          (--color-* and --brand-*) resolve to the same palette. ---- */
-  --brand-primary:        #0759F8;
-  --brand-secondary:      #00A1F3;
-  --brand-accent:         #EBA94E;
+          Same values as the tokens above so BOTH naming schemes
+          (--color-* and --brand-*) resolve to one palette. ---- */
+  --brand-primary:        #0D9488;
+  --brand-secondary:      #2DD4BF;
+  --brand-accent:         #E8902C;
+  --brand-dark:           #06342F;
   --brand-white:          #FFFFFF;
-  --brand-black:          #000000;
+  --brand-black:          #0A1413;
 
   /* Typography */
-  --font-display:         'EB Garamond', Georgia, serif;     /* headings, brand */
-  --font-body:            'Poppins', system-ui, sans-serif;  /* body copy       */
+  --font-display:         'Montserrat', 'Segoe UI', system-ui, sans-serif; /* headings, brand */
+  --font-body:            'Poppins', system-ui, sans-serif;                /* body copy       */
 
   --text-xs:    0.75rem;    /* 12px */
   --text-sm:    0.875rem;   /* 14px */
@@ -62,31 +64,20 @@
   --text-4xl:   4rem;       /* 64px */
 
   /* Spacing scale */
-  --space-1:  0.25rem;
-  --space-2:  0.5rem;
-  --space-3:  0.75rem;
-  --space-4:  1rem;
-  --space-6:  1.5rem;
-  --space-8:  2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-20: 5rem;
-  --space-24: 6rem;
-  --space-32: 8rem;
+  --space-1:  0.25rem;  --space-2:  0.5rem;  --space-3:  0.75rem;
+  --space-4:  1rem;     --space-6:  1.5rem;  --space-8:  2rem;
+  --space-10: 2.5rem;   --space-12: 3rem;    --space-16: 4rem;
+  --space-20: 5rem;     --space-24: 6rem;    --space-32: 8rem;
 
   /* Shape */
-  --radius-sm:  6px;
-  --radius-md:  12px;
-  --radius-lg:  20px;
-  --radius-xl:  32px;
-  --radius-full: 9999px;
+  --radius-sm:  6px;  --radius-md:  12px; --radius-lg:  18px;
+  --radius-xl:  28px; --radius-full: 9999px;
 
-  /* Shadows (faint blue-black cast for cohesion) */
-  --shadow-sm:  0 1px 3px rgba(10,19,32,0.07), 0 1px 2px rgba(10,19,32,0.05);
-  --shadow-md:  0 4px 16px rgba(10,19,32,0.09);
-  --shadow-lg:  0 12px 40px rgba(10,19,32,0.11);
-  --shadow-xl:  0 24px 60px rgba(10,19,32,0.13);
+  /* Shadows (faint teal-ink cast for cohesion) */
+  --shadow-sm:  0 1px 3px rgba(10,52,47,0.07), 0 1px 2px rgba(10,52,47,0.05);
+  --shadow-md:  0 6px 18px rgba(10,52,47,0.08);
+  --shadow-lg:  0 14px 40px rgba(10,52,47,0.10);
+  --shadow-xl:  0 26px 60px rgba(10,52,47,0.13);
 
   /* Transitions */
   --transition-fast:   150ms ease;
@@ -96,13 +87,33 @@
   /* Layout */
   --container-max: 1240px;
   --section-pad-y: var(--space-24);
-  --navbar-height: 72px;
+  --navbar-height: 116px;   /* top contact bar (36) + main bar (80) */
+}
+
+/* ── Dark mode (toggled via the moon button → <html data-theme="dark">) ──
+   Token-level inversion. Sections that are built on these tokens adapt
+   automatically; a few homepage-specific surfaces have their own
+   overrides inside index.php. This is a solid baseline, not a fully
+   art-directed dark theme. ───────────────────────────────────────────── */
+html[data-theme="dark"] {
+  --color-surface:      #0E1A18;
+  --color-surface-alt:  #122421;
+  --color-surface-mint: #0F211E;
+  --color-border:       #21322F;
+  --color-text-heading: #F2F7F6;
+  --color-text-body:    #C2CFCC;
+  --color-text-muted:   #8A9794;
+  --color-secondary:    #05201C;
+  --shadow-md: 0 6px 18px rgba(0,0,0,0.45);
+  --shadow-lg: 0 14px 40px rgba(0,0,0,0.5);
+  --shadow-xl: 0 26px 60px rgba(0,0,0,0.55);
+  color-scheme: dark;
 }
 
 /* ── Reset / Base ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; scroll-padding-top: var(--navbar-height); }
 
 body {
   font-family: var(--font-body);
@@ -110,32 +121,33 @@ body {
   color: var(--color-text-body);
   background-color: var(--color-surface);
   line-height: 1.65;
+  transition: background-color var(--transition-base), color var(--transition-base);
 }
 
 /* ── Typography helpers ───────────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   color: var(--color-text-heading);
-  line-height: 1.12;
+  line-height: 1.1;
   letter-spacing: -0.01em;
-  font-weight: 700;
+  font-weight: 800;
 }
 
-h1 { font-size: var(--text-4xl); font-weight: 800; }
-h2 { font-size: var(--text-3xl); font-weight: 700; }
+h1 { font-size: var(--text-4xl); font-weight: 900; }
+h2 { font-size: var(--text-3xl); font-weight: 800; }
 h3 { font-size: var(--text-xl);  font-weight: 700; }
-h4 { font-size: var(--text-lg);  font-weight: 600; }
+h4 { font-size: var(--text-lg);  font-weight: 700; }
 
 p { line-height: 1.75; }
 
 a { color: inherit; text-decoration: none; }
 img { display: block; max-width: 100%; }
 
-/* Inline text link inside body copy — readable royal, gold underline on hover */
+/* Inline text link inside body copy */
 .link {
   color: var(--color-primary);
   text-decoration: underline;
-  text-decoration-color: rgba(7,89,248,0.35);
+  text-decoration-color: rgba(13,148,136,0.35);
   text-underline-offset: 3px;
   transition: text-decoration-color var(--transition-fast), color var(--transition-fast);
 }
@@ -149,18 +161,9 @@ img { display: block; max-width: 100%; }
   padding-inline: var(--space-6);
 }
 
-.section {
-  padding-block: var(--section-pad-y);
-}
-
-.section--alt {
-  background-color: var(--color-surface-alt);
-}
-
-.section--dark {
-  background-color: var(--color-secondary);
-  color: var(--color-text-inverse);
-}
+.section { padding-block: var(--section-pad-y); }
+.section--alt  { background-color: var(--color-surface-alt); }
+.section--dark { background-color: var(--color-secondary); color: var(--color-text-inverse); }
 
 /* ── Section label (eyebrow text) ────────────────────────── */
 .eyebrow {
@@ -169,19 +172,17 @@ img { display: block; max-width: 100%; }
   gap: var(--space-2);
   font-family: var(--font-body);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-text-muted);
   margin-bottom: var(--space-4);
 }
-
 .eyebrow::before {
   content: '';
   display: block;
-  width: 24px;
-  height: 2px;
-  background: var(--color-accent);   /* gold tick */
+  width: 24px; height: 2px;
+  background: var(--color-accent);
   flex-shrink: 0;
 }
 
@@ -190,11 +191,11 @@ img { display: block; max-width: 100%; }
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0.75rem 1.625rem;
-  border-radius: var(--radius-full);
+  padding: 0.8rem 1.625rem;
+  border-radius: var(--radius-md);
   font-family: var(--font-body);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.01em;
   border: 2px solid transparent;
   cursor: pointer;
@@ -202,81 +203,31 @@ img { display: block; max-width: 100%; }
   white-space: nowrap;
   text-decoration: none;
 }
+.btn--primary { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.btn--primary:hover { background: var(--color-primary-deep); border-color: var(--color-primary-deep); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(13,148,136,0.30); }
 
-/* Primary = royal blue (contrast-safe), gold sits as the accent elsewhere */
-.btn--primary {
-  background: var(--color-primary);
-  color: #fff;
-  border-color: var(--color-primary);
-}
-.btn--primary:hover {
-  background: var(--color-primary-deep);
-  border-color: var(--color-primary-deep);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(7,89,248,0.28);
-}
+.btn--accent { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+.btn--accent:hover { background: var(--color-accent-dark); border-color: var(--color-accent-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
 
-/* Optional warm CTA when you want the gold to lead (e.g. a single hero CTA) */
-.btn--accent {
-  background: var(--color-accent);
-  color: var(--color-secondary);
-  border-color: var(--color-accent);
-}
-.btn--accent:hover {
-  background: var(--color-accent-dark);
-  border-color: var(--color-accent-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
+.btn--dark { background: var(--color-secondary); color: #fff; border-color: var(--color-secondary); }
+.btn--dark:hover { background: #0A4A42; border-color: #0A4A42; transform: translateY(-2px); box-shadow: var(--shadow-md); }
 
-.btn--dark {
-  background: var(--color-secondary);
-  color: var(--color-text-inverse);
-  border-color: var(--color-secondary);
-}
-.btn--dark:hover {
-  background: #0F1E3A;
-  border-color: #0F1E3A;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
+.btn--outline { background: transparent; color: var(--color-primary); border-color: var(--color-border); }
+.btn--outline:hover { border-color: var(--color-primary); color: var(--color-primary); transform: translateY(-2px); }
 
-.btn--outline {
-  background: transparent;
-  color: var(--color-primary);
-  border-color: var(--color-border);
-}
-.btn--outline:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  transform: translateY(-2px);
-}
-
-.btn--outline-inv {
-  background: transparent;
-  color: var(--color-text-inverse);
-  border-color: rgba(255,255,255,0.4);
-}
-.btn--outline-inv:hover {
-  border-color: #fff;
-  background: rgba(255,255,255,0.08);
-  transform: translateY(-2px);
-}
+.btn--outline-inv { background: transparent; color: var(--color-text-inverse); border-color: rgba(255,255,255,0.4); }
+.btn--outline-inv:hover { border-color: #fff; background: rgba(255,255,255,0.08); transform: translateY(-2px); }
 
 .btn svg, .btn i { font-size: 0.85em; transition: transform var(--transition-fast); }
 .btn:hover svg, .btn:hover i { transform: translateX(3px); }
 
 /* ── Utility classes ──────────────────────────────────────── */
 .text-muted   { color: var(--color-text-muted); }
-.text-accent  { color: var(--color-primary); }       /* readable blue on light bg */
-.text-gold    { color: var(--color-accent); }         /* only on dark backgrounds  */
+.text-accent  { color: var(--color-primary); }
+.text-teal    { color: var(--color-primary); }
 .text-center  { text-align: center; }
-
-.fw-400 { font-weight: 400; }
-.fw-600 { font-weight: 600; }
-.fw-700 { font-weight: 700; }
-.fw-800 { font-weight: 800; }
-
+.fw-400 { font-weight: 400; } .fw-600 { font-weight: 600; }
+.fw-700 { font-weight: 700; } .fw-800 { font-weight: 800; }
 .mt-auto { margin-top: auto; }
 
 /* ── Tag / badge ──────────────────────────────────────────── */
@@ -289,10 +240,10 @@ img { display: block; max-width: 100%; }
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.tag--accent { background: var(--color-accent); color: var(--color-secondary); }
+.tag--accent { background: var(--color-accent); color: #fff; }
 .tag--muted  { background: var(--color-surface-alt); color: var(--color-text-muted); border: 1px solid var(--color-border); }
 .tag--dark   { background: var(--color-secondary); color: #fff; }
-.tag--blue   { background: rgba(7,89,248,0.10); color: var(--color-primary); }
+.tag--teal   { background: rgba(13,148,136,0.10); color: var(--color-primary); }
 
 /* ── Card base ────────────────────────────────────────────── */
 .card {
@@ -302,44 +253,28 @@ img { display: block; max-width: 100%; }
   overflow: hidden;
   transition: box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base);
 }
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-4px);
-  border-color: transparent;
-}
+.card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); border-color: transparent; }
 
 /* ── Divider ──────────────────────────────────────────────── */
-.divider {
-  border: none;
-  border-top: 1px solid var(--color-border);
-  margin-block: var(--space-8);
-}
+.divider { border: none; border-top: 1px solid var(--color-border); margin-block: var(--space-8); }
 
-/* ── Scroll reveal animation (JS triggers .is-visible) ───── */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* ── Scroll reveal animation (JS toggles .is-visible) ────── */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
 .reveal-delay-1 { transition-delay: 0.08s; }
 .reveal-delay-2 { transition-delay: 0.16s; }
 .reveal-delay-3 { transition-delay: 0.24s; }
 .reveal-delay-4 { transition-delay: 0.32s; }
 .reveal-delay-5 { transition-delay: 0.40s; }
 
-/* Respect users who prefer no motion */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; transition: none; }
 }
 
-/* ── Accessible focus ring (brand gold) ───────────────────── */
+/* ── Accessible focus ring ────────────────────────────────── */
 :where(a, button, input, textarea, select):focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -349,17 +284,12 @@ img { display: block; max-width: 100%; }
   h1 { font-size: var(--text-3xl); }
   h2 { font-size: var(--text-2xl); }
 }
-
 @media (max-width: 768px) {
-  :root {
-    --section-pad-y: var(--space-12);
-    --container-max: 100%;
-  }
+  :root { --section-pad-y: var(--space-12); --container-max: 100%; --navbar-height: 72px; }
   h1 { font-size: var(--text-2xl); }
   h2 { font-size: var(--text-xl); }
   h3 { font-size: var(--text-lg); }
 }
-
 @media (max-width: 480px) {
   :root { --section-pad-y: var(--space-10); }
   .container { padding-inline: var(--space-4); }

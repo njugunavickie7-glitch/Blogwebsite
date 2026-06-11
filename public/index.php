@@ -1,422 +1,1069 @@
 <?php
-// public/index.php
-$page_title = 'Ismano Portfolio — Creative Digital Solutions';
-$page_description = 'Explore our creative portfolio of web development, design, and digital solutions.';
-$use_home_navbar = true; // Tell template to use home navbar with hero effects
-
-ob_start();
-
-require_once __DIR__ . '/../app/config/db_connect.php';
+// public/index.php — ISMAN Company · Engineering Services homepage
+$page_title       = 'ISMAN Company — Engineering Services in Kenya';
+$page_description = 'Stainless fabrication, welding, food processing lines, HVAC and commercial kitchens — engineered for Kenyan industry. Serving Nairobi and East Africa.';
+$use_home_navbar  = true;
 
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 
-$stmt = $pdo->prepare("
-    SELECT p.*, c.category_name
-    FROM projects p
-    LEFT JOIN project_categories c ON p.category_id = c.id
-    WHERE p.status = 'published'
-    ORDER BY p.created_at DESC
-");
-$stmt->execute();
-$allProjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$featuredProjects = [];
-if (!empty($allProjects)) {
-    $keys = array_rand($allProjects, min(3, count($allProjects)));
-    foreach ((array) $keys as $k) { $featuredProjects[] = $allProjects[$k]; }
+/* ------------------------------------------------------------------
+   DATA SOURCES
+   Projects, services and blogs are now pulled LIVE from the database
+   using the exact same data sources as the dedicated listing pages:
+     - projects : ProjectController->getProjects('published') / getCategories()
+     - services : services table (status = 'published')
+     - blogs    : blogs table (status = 'published')
+   If the DB is unreachable or returns nothing, the homepage falls back
+   to the original static showcase content so it never renders broken.
+------------------------------------------------------------------ */
+// The homepage is the site's front door, so it must never hard-fail. We load the
+// DB layer defensively: if db_connect.php throws (e.g. the database is completely
+// unreachable), $pdo / ProjectController simply won't be defined, and each section
+// below catches that and renders its static showcase fallback instead.
+$db_ready = false;
+try {
+    require_once __DIR__ . '/../app/config/db_connect.php';
+    require_once __DIR__ . '/../app/controllers/ProjectController.php';
+    $db_ready = isset($pdo);
+} catch (Throwable $e) {
+    $db_ready = false;
 }
 
-$stmt = $pdo->prepare("SELECT * FROM services WHERE status = 'published' ORDER BY created_at DESC LIMIT 4");
-$stmt->execute();
-$services = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$stmt = $pdo->prepare("
-    SELECT b.*, c.name as category_name
-    FROM blogs b
-    LEFT JOIN blog_categories c ON b.category_id = c.id
-    WHERE b.status = 'published'
-    ORDER BY b.published_at DESC
-    LIMIT 3
-");
-$stmt->execute();
-$blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$stmt = $pdo->prepare("SELECT COUNT(*) as count FROM project_categories");
-$stmt->execute();
-$totalCategories = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-$totalProjects   = count($allProjects);
-
-$serviceIcons = [
-    'default' => 'fa-solid fa-layer-group',
-    'web'     => 'fa-solid fa-globe',
-    'design'  => 'fa-solid fa-pen-nib',
-    'seo'     => 'fa-solid fa-chart-line',
-    'brand'   => 'fa-solid fa-star',
-    'content' => 'fa-solid fa-pen-to-square',
-    'social'  => 'fa-solid fa-share-nodes',
-    'ads'     => 'fa-solid fa-rectangle-ad',
-    'mobile'  => 'fa-solid fa-mobile-screen',
-    'app'     => 'fa-solid fa-mobile-screen',
+$brand = [
+    'phone' => '072 411 4555',
+    'email' => 'info@isman.co.ke',
+    'loc'   => 'Nairobi, Kenya',
 ];
-function serviceIcon(string $title, array $map): string {
-    $t = strtolower($title);
-    foreach ($map as $k => $v) { if ($k !== 'default' && str_contains($t, $k)) return $v; }
-    return $map['default'];
-}
 
-// Hero slideshow images
+// Hero "live" panel (static — not DB-driven)
+$heroBars = [
+    ['label' => 'Commercial Kitchens', 'pct' => 85],
+    ['label' => 'HVAC Systems',        'pct' => 72],
+    ['label' => 'Hospital Equipment',  'pct' => 60],
+];
+
+// Hero full-bleed background slideshow (drives the NN/NN counter).
 $heroSlides = [
-    [
-        'url'     => 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80',
-        'credit'  => 'Photo: Unsplash',
-        'caption' => 'Modern creative workspace',
-    ],
-    [
-        'url'     => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=80',
-        'credit'  => 'Photo: Unsplash',
-        'caption' => 'Team collaboration',
-    ],
-    [
-        'url'     => 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1920&q=80',
-        'credit'  => 'Photo: Unsplash',
-        'caption' => 'Strategy & planning',
-    ],
-    [
-        'url'     => 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1920&q=80',
-        'credit'  => 'Photo: Unsplash',
-        'caption' => 'Creative brainstorming',
-    ],
-    [
-        'url'     => 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=1920&q=80',
-        'credit'  => 'Photo: Unsplash',
-        'caption' => 'Digital innovation',
-    ],
+    'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920&q=80&auto=format&fit=crop', // welding sparks
+    'https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=1920&q=80&auto=format&fit=crop', // metal fabrication
+    'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1920&q=80&auto=format&fit=crop', // industrial / HVAC
+    'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1920&q=80&auto=format&fit=crop',     // stainless kitchen
 ];
 
-$serviceImages = [
-    'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=75',
-    'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=600&q=75',
-    'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=600&q=75',
-    'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=600&q=75',
+// Headline stats row (static)
+$stats = [
+    ['num'=>350,'suffix'=>'+','label'=>'Projects Delivered'],
+    ['num'=>15, 'suffix'=>'+','label'=>'Years Active'],
+    ['num'=>98, 'suffix'=>'%','label'=>'Client Satisfaction'],
+    ['num'=>24, 'suffix'=>'/7','label'=>'Support Available'],
 ];
+
+// About-section stats (static)
+$aboutStats = [
+    ['num'=>15,'suffix'=>'+','label'=>'Years Experience'],
+    ['num'=>500,'suffix'=>'+','label'=>'Projects Completed'],
+    ['num'=>200,'suffix'=>'+','label'=>'Happy Clients'],
+    ['num'=>8,'suffix'=>'','label'=>'Core Services'],
+];
+
+// Project gallery (static showcase)
+$gallery = [
+    'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=600&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=600&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=600&q=80&auto=format&fit=crop',
+];
+
+// Testimonials (static — no testimonials table in the schema)
+$testimonials = [
+    ['quote'=>'ISMAN designed and installed our 450 sqm hotel kitchen in under 8 weeks. The SS304 fabrication quality exceeded international standards, and their team worked around our operational hours without a single disruption to guests.','name'=>'James Mwangi','role'=>'General Manager, Radisson Blu Nairobi','tag'=>'Commercial Kitchen','initial'=>'J'],
+    ['quote'=>'The stainless balustrade work at Two Rivers was flawless. Precision welds, perfect alignment across three floors, and delivered ahead of schedule. We have used them on every project since.','name'=>'Aisha Noor','role'=>'Project Lead, Centum Investment','tag'=>'Stainless Railing','initial'=>'A'],
+    ['quote'=>'Their hospital fit-out met every infection-control requirement we set. Documentation was thorough and the finish on the SS316 surfaces is exactly what a sterile environment needs.','name'=>'Dr. Peter Otieno','role'=>'Facilities Director, Kenyatta National Hospital','tag'=>'Hospital Fit-out','initial'=>'P'],
+    ['quote'=>'We commissioned a full processing line and ISMAN handled design, fabrication and install end to end. HACCP-ready, on budget, and running at full throughput from day one.','name'=>'Grace Wambui','role'=>'Operations Manager, Brookside Dairy','tag'=>'Food Processing','initial'=>'G'],
+];
+
+/* ==================================================================
+   STATIC FALLBACKS — used only if the DB is empty/unreachable.
+   These keep the original hand-tuned showcase content available so the
+   marketing homepage is never blank.
+================================================================== */
+$fallbackProjectFilters = [
+    'all'         => 'All',
+    'kitchen'     => 'Commercial Kitchen',
+    'railing'     => 'Stainless Railing',
+    'hospital'    => 'Hospital Fit-out',
+    'food'        => 'Food Processing',
+    'hvac'        => 'HVAC Systems',
+    'welding'     => 'Welding & Fabrication',
+];
+$fallbackProjects = [
+    ['year'=>'2024','cat'=>'kitchen','catLabel'=>'Commercial Kitchen','client'=>'Carlson Rezidor Hotel Group','title'=>'Radisson Blu Nairobi','desc'=>'Full turnkey 450 sqm commercial kitchen with SS304 cooking suites, extraction hoods, cold rooms and dishwashing stations.','img'=>'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=800&q=80&auto=format&fit=crop'],
+    ['year'=>'2023','cat'=>'railing','catLabel'=>'Stainless Railing','client'=>'Centum Investment','title'=>'Two Rivers Mall','desc'=>'Architectural-grade SS316 glass balustrade system across 3 floors of retail and entertainment space — 220 linear meters.','img'=>'https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?w=800&q=80&auto=format&fit=crop'],
+    ['year'=>'2024','cat'=>'hospital','catLabel'=>'Hospital Fit-out','client'=>'Ministry of Health','title'=>'Kenyatta National Hospital','desc'=>'SS316 pharmacy dispensing counters, sluice room equipment and sterile storage solutions — infection-control compliant.','img'=>'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80&auto=format&fit=crop'],
+    ['year'=>'2023','cat'=>'food','catLabel'=>'Food Processing','client'=>'Brookside Dairy','title'=>'Ruiru Processing Line','desc'=>'HACCP-ready stainless mixing tanks, conveyors and CIP pipework for a high-throughput dairy processing facility.','img'=>'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&q=80&auto=format&fit=crop'],
+    ['year'=>'2024','cat'=>'hvac','catLabel'=>'HVAC Systems','client'=>'Garden City Mall','title'=>'Central Air Handling','desc'=>'Design, supply and install of ducted HVAC across 8,000 sqm of retail, with zoned controls and energy recovery.','img'=>'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80&auto=format&fit=crop'],
+    ['year'=>'2023','cat'=>'welding','catLabel'=>'Welding & Fabrication','client'=>'Bamburi Cement','title'=>'Structural Steel Platform','desc'=>'Custom mild-steel access platforms and guarding fabricated and TIG-welded to spec for a plant maintenance upgrade.','img'=>'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&q=80&auto=format&fit=crop'],
+];
+$fallbackServices = [
+    ['icon'=>'fa-pen-ruler','color'=>'#0D9488','title'=>'3D & 2D Design','desc'=>'Professional AutoCAD engineering design in 2D and 3D — full drawing packages, utility layouts and BOQ-ready submissions.','img'=>'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&q=80&auto=format&fit=crop','slug'=>''],
+    ['icon'=>'fa-utensils','color'=>'#2DD4BF','title'=>'Commercial Kitchen','desc'=>'End-to-end design, fabrication and installation of professional SS304 commercial kitchen equipment for restaurants, hotels and institutions.','img'=>'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=600&q=80&auto=format&fit=crop','slug'=>''],
+    ['icon'=>'fa-wind','color'=>'#2563EB','title'=>'HVAC Systems & Air Conditioning','desc'=>'Heating, ventilation & air conditioning — custom-engineered, installed and maintained for commercial and industrial clients across Kenya.','img'=>'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&q=80&auto=format&fit=crop','slug'=>''],
+    ['icon'=>'fa-fire-flame-curved','color'=>'#E8902C','title'=>'Gas & TIG Welding','desc'=>'Precision gas and TIG welding for stainless steel, mild steel and aluminium — structural, decorative and food-grade applications.','img'=>'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=80&auto=format&fit=crop','slug'=>''],
+    ['icon'=>'fa-faucet-drip','color'=>'#0D9488','title'=>'Plumbing','desc'=>'Commercial and industrial plumbing design, installation and maintenance — hot/cold water, drainage, gas and medical gas systems.','img'=>'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=600&q=80&auto=format&fit=crop','slug'=>''],
+    ['icon'=>'fa-suitcase-medical','color'=>'#EC4899','title'=>'Hospital & Pharmacy','desc'=>'SS316 pharmacy counters, sluice rooms, theatre equipment and medical storage solutions — HACCP and infection-control compliant.','img'=>'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&q=80&auto=format&fit=crop','slug'=>''],
+    ['icon'=>'fa-industry','color'=>'#E8902C','title'=>'Food Processing','desc'=>'HACCP-ready food processing equipment — mixing tanks, conveyors, cutting tables and silos — custom-fabricated in food-grade SS304.','img'=>'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600&q=80&auto=format&fit=crop','slug'=>''],
+    ['icon'=>'fa-stairs','color'=>'#2563EB','title'=>'Stainless Steel Railing','desc'=>'Architecturally designed SS304/SS316 balustrades, handrails and staircase railings — mirror, satin or powder-coated finishes.','img'=>'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&q=80&auto=format&fit=crop','slug'=>''],
+];
+
+/* Icon + colour palette reused for DB services.
+   (The services table has no icon/colour columns, so we cycle a palette
+   that matches the original 8-card look. If you later add `icon` / `color`
+   columns, they are used automatically.) */
+$svcIconPalette = [
+    ['icon'=>'fa-pen-ruler',         'color'=>'#0D9488'],
+    ['icon'=>'fa-utensils',          'color'=>'#2DD4BF'],
+    ['icon'=>'fa-wind',              'color'=>'#2563EB'],
+    ['icon'=>'fa-fire-flame-curved', 'color'=>'#E8902C'],
+    ['icon'=>'fa-faucet-drip',       'color'=>'#0D9488'],
+    ['icon'=>'fa-suitcase-medical',  'color'=>'#EC4899'],
+    ['icon'=>'fa-industry',          'color'=>'#E8902C'],
+    ['icon'=>'fa-stairs',            'color'=>'#2563EB'],
+];
+
+/* ---------- DYNAMIC: PROJECTS ---------- */
+$projects       = [];
+$projectFilters = ['all' => 'All'];
+try {
+    if (!$db_ready) { throw new RuntimeException('Database layer unavailable'); }
+    $projectController = new ProjectController($pdo);
+    $dbProjects   = $projectController->getProjects('published');
+    $dbCategories = $projectController->getCategories();
+
+    // getProjects() rows expose category_id + category_name; resolve slug via categories list.
+    $catById = [];
+    foreach ($dbCategories as $c) {
+        $catById[$c['id']] = [
+            'slug' => $c['category_slug'] ?? 'all',
+            'name' => $c['category_name'] ?? 'Project',
+        ];
+    }
+
+    // Cap at 6 for the homepage showcase grid and normalise to the card shape.
+    foreach (array_slice($dbProjects, 0, 6) as $p) {
+        $cid   = $p['category_id'] ?? null;
+        $slug  = ($cid !== null && isset($catById[$cid])) ? $catById[$cid]['slug'] : 'all';
+        $label = $p['category_name'] ?? (($cid !== null && isset($catById[$cid])) ? $catById[$cid]['name'] : 'Project');
+        $projects[] = [
+            'id'       => (int)($p['id'] ?? 0),
+            'year'     => !empty($p['created_at']) ? date('Y', strtotime($p['created_at'])) : '',
+            'cat'      => $slug,
+            'catLabel' => $label,
+            'client'   => trim((string)($p['major_title'] ?? '')), // major_title fills the eyebrow slot (no client column)
+            'title'    => $p['small_title'] ?? 'Untitled Project',
+            'desc'     => mb_strimwidth(strip_tags((string)($p['description'] ?? '')), 0, 160, '…'),
+            'img'      => (string)($p['cover_image'] ?? ''),
+        ];
+    }
+
+    // Build filter tabs only from categories that are actually visible in the grid,
+    // so every tab is guaranteed to have at least one card.
+    foreach ($projects as $np) {
+        if (!empty($np['cat']) && $np['cat'] !== 'all') {
+            $projectFilters[$np['cat']] = $np['catLabel'];
+        }
+    }
+} catch (Throwable $e) {
+    $projects = [];
+}
+if (empty($projects)) {
+    $projects       = $fallbackProjects;
+    $projectFilters = $fallbackProjectFilters;
+}
+
+/* ---------- DYNAMIC: SERVICES ---------- */
+$services = [];
+try {
+    if (!$db_ready) { throw new RuntimeException('Database layer unavailable'); }
+    $stmt = $pdo->prepare("
+        SELECT s.*, u.username AS creator_name
+        FROM services s
+        LEFT JOIN users u ON s.created_by = u.id
+        WHERE s.status = 'published'
+        ORDER BY s.created_at DESC
+        LIMIT 8
+    ");
+    $stmt->execute();
+    $dbServices = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($dbServices as $i => $s) {
+        $pal = $svcIconPalette[$i % count($svcIconPalette)];
+        $services[] = [
+            'icon'  => !empty($s['icon'])  ? $s['icon']  : $pal['icon'],   // uses DB columns if present
+            'color' => !empty($s['color']) ? $s['color'] : $pal['color'],
+            'title' => $s['title'] ?? 'Service',
+            'desc'  => mb_strimwidth(strip_tags((string)($s['short_description'] ?? '')), 0, 150, '…'),
+            'img'   => (string)($s['cover_image'] ?? ''),
+            'slug'  => (string)($s['slug'] ?? ''),
+        ];
+    }
+} catch (Throwable $e) {
+    $services = [];
+}
+if (empty($services)) {
+    $services = $fallbackServices;
+}
+
+/* ---------- DYNAMIC: BLOGS ---------- */
+$blogs = [];
+try {
+    if (!$db_ready) { throw new RuntimeException('Database layer unavailable'); }
+    $stmt = $pdo->prepare("
+        SELECT b.*, c.name AS category_name, c.slug AS category_slug, c.color AS category_color,
+               u.username AS author_name
+        FROM blogs b
+        LEFT JOIN blog_categories c ON b.category_id = c.id
+        LEFT JOIN users u ON b.author_id = u.id
+        WHERE b.status = 'published'
+        ORDER BY b.published_at DESC
+        LIMIT 3
+    ");
+    $stmt->execute();
+    $blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    $blogs = [];
+}
+
+// Service options for the enquiry form (built from whatever services we ended up with).
+$serviceOptions = array_map(fn($s) => $s['title'], $services);
+
+/* Tiny helper: render a number+suffix that the counter JS animates. */
+function statNum(int $n, string $suffix): string {
+    return '<span class="stat-count" data-target="'.$n.'">0</span><span class="stat-suffix">'.htmlspecialchars($suffix).'</span>';
+}
+
+/* Return a safe <img src>: the real URL if present, otherwise a branded
+   inline placeholder (matches the JS onerror fallback) so empty DB images
+   never produce a broken-image icon. */
+function ismanImg(string $url): string {
+    $url = trim($url);
+    if ($url !== '') return htmlspecialchars($url);
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">'
+         . '<rect width="600" height="450" fill="#d7e4e2"/>'
+         . '<text x="300" y="235" text-anchor="middle" font-family="Montserrat,sans-serif" '
+         . 'font-size="20" font-weight="700" fill="#0a766b">ISMAN ENGINEERING</text></svg>';
+    return 'data:image/svg+xml;utf8,' . rawurlencode($svg);
+}
+
+ob_start();
 ?>
 
 <style>
-/* Additional homepage styles that extend the template */
-.page-body { padding-top: var(--navbar-height); }
+/* =====================================================================
+   ISMAN HOMEPAGE — scoped styles (prefixed to avoid collisions).
+   Relies on theme.css tokens with literal fallbacks.
+===================================================================== */
+.hp-main{ overflow-x: clip; }
+.hp-section{ padding-block: var(--space-24, 6rem); }
+.hp-eyebrow-center{ display:flex; justify-content:center; }
+.hp-pill{ display:inline-flex; align-items:center; gap:8px; padding:7px 18px; border-radius:var(--radius-full,9999px); background:rgba(13,148,136,.10); color:var(--brand-primary,#0D9488); font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+.hp-pill .dot{ width:7px; height:7px; border-radius:50%; background:var(--brand-primary,#0D9488); }
+.hp-h2{ font-family:var(--font-display,sans-serif); font-weight:800; font-size:clamp(2rem,4vw,2.9rem); letter-spacing:-.01em; color:var(--color-text-heading,#0A1413); text-transform:uppercase; }
+.hp-h2 .accent{ color:var(--brand-primary,#0D9488); }
+.hp-lead{ max-width:620px; color:var(--color-text-muted,#7B8987); font-size:1.02rem; }
 
-/* Hero Section */
-.site-hero { cursor: none; position: relative; height: calc(100svh - var(--navbar-height)); min-height: 580px; overflow: hidden; display: flex; align-items: center; }
-.hero-slides { position: absolute; inset: 0; z-index: 0; }
-.hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.5s ease; }
-.hero-slide.is-active { opacity: 1; }
-.hero-slide img { width: 100%; height: 100%; object-fit: cover; object-position: center; transform: scale(1.08); transition: transform 9s ease; }
-.hero-slide.is-active img { transform: scale(1); }
-.hero-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to right, rgba(4,4,8,0.86) 0%, rgba(4,4,8,0.5) 55%, rgba(4,4,8,0.2) 100%), linear-gradient(to top, rgba(4,4,8,0.6) 0%, transparent 45%); }
-.hero-cursor { position: absolute; top: 0; left: 0; width: 32px; height: 32px; pointer-events: none; z-index: 10; transform: translate(-50%, -50%); opacity: 0; }
-.hero-cursor svg { width: 100%; height: 100%; filter: drop-shadow(0 0 6px rgba(200,242,60,0.9)) drop-shadow(0 0 14px rgba(200,242,60,0.5)); animation: bolt-pulse 2.4s ease infinite; }
-@keyframes bolt-pulse { 0%, 100% { filter: drop-shadow(0 0 5px rgba(200,242,60,0.9)) drop-shadow(0 0 12px rgba(200,242,60,0.4)); } 50% { filter: drop-shadow(0 0 10px rgba(200,242,60,1)) drop-shadow(0 0 24px rgba(200,242,60,0.7)); } }
-.hero-cursor-light { position: absolute; top: 0; left: 0; width: 320px; height: 320px; pointer-events: none; z-index: 2; border-radius: 50%; transform: translate(-50%, -50%); background: radial-gradient(circle, rgba(200,242,60,0.09) 0%, rgba(200,242,60,0.04) 40%, transparent 70%); opacity: 0; }
-.hero-content { position: relative; z-index: 4; width: 100%; }
-.hero-heading { font-family: var(--font-display); font-size: clamp(3rem, 6.5vw, 5.5rem); font-weight: 700; line-height: 1.06; letter-spacing: 0.01em; color: #fff; margin-bottom: var(--space-6); font-style: italic; }
-.hero-heading strong { font-style: normal; font-weight: 700; display: block; color: var(--brand-accent); letter-spacing: -0.01em; }
-.hero-sub { font-family: var(--font-body); font-size: var(--text-base); font-weight: 300; color: rgba(255,255,255,0.6); line-height: 1.85; max-width: 480px; margin-bottom: var(--space-10); letter-spacing: 0.01em; }
-.hero-dots { display: flex; gap: var(--space-2); align-items: center; margin-bottom: 0; }
-.hero-dot { width: 26px; height: 2px; background: rgba(255,255,255,0.25); border-radius: 2px; cursor: none; transition: all var(--transition-base); border: none; padding: 0; }
-.hero-dot.is-active { background: var(--brand-accent); width: 44px; }
-.hero-caption { position: absolute; bottom: var(--space-10); right: var(--space-8); z-index: 5; font-family: var(--font-body); font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.28); letter-spacing: 0.1em; text-transform: uppercase; }
-.hero-scroll-btn { position: absolute; bottom: var(--space-8); left: 50%; transform: translateX(-50%); z-index: 5; display: flex; flex-direction: column; align-items: center; gap: var(--space-3); background: none; border: none; cursor: none; color: rgba(255,255,255,0.5); font-family: var(--font-body); font-size: 9px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; transition: color var(--transition-base); text-decoration: none; padding: 0; }
-.hero-scroll-btn:hover { color: var(--brand-accent); }
-.scroll-mouse { width: 26px; height: 40px; border: 1.5px solid rgba(255,255,255,0.35); border-radius: 14px; position: relative; transition: border-color var(--transition-base); }
-.hero-scroll-btn:hover .scroll-mouse { border-color: var(--brand-accent); }
-.scroll-mouse::before { content: ''; position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 3px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 2px; animation: mouse-wheel 1.6s ease infinite; }
-.hero-scroll-btn:hover .scroll-mouse::before { background: var(--brand-accent); }
-@keyframes mouse-wheel { 0% { opacity: 1; transform: translateX(-50%) translateY(0); } 60% { opacity: 0; transform: translateX(-50%) translateY(10px); } 61% { opacity: 0; transform: translateX(-50%) translateY(0); } 100% { opacity: 1; transform: translateX(-50%) translateY(0); } }
+/* ---------- HERO (full-bleed photo + liquid glass) ---------- */
+.hp-hero{ position:relative; isolation:isolate; overflow:hidden; min-height:100svh; display:flex; align-items:center;
+  padding-block:calc(var(--navbar-height,116px) + var(--space-10,2.5rem)) var(--space-16,4rem);
+  background:#04201d; color:#fff; }
 
-/* Stats */
-.stats-section { background: var(--color-surface-alt); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding-block: var(--space-12); }
-.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-.stat-item { padding: var(--space-6) var(--space-8); border-right: 1px solid var(--color-border); }
-.stat-item:last-child { border-right: none; }
-.stat-number { font-family: var(--font-display); font-size: clamp(2.5rem, 4vw, 3.5rem); font-weight: 800; color: var(--brand-primary); line-height: 1; letter-spacing: -0.04em; margin-bottom: var(--space-2); }
-.stat-number .accent { color: var(--brand-accent); }
+/* background slideshow (drives the 02/04 counter) */
+.hp-hero-bg{ position:absolute; inset:0; z-index:0; }
+.hp-hero-slide{ position:absolute; inset:0; background-size:cover; background-position:center;
+  opacity:0; transform:scale(1.07); transition:opacity 1.4s ease, transform 8s ease; will-change:opacity, transform; }
+.hp-hero-slide.is-active{ opacity:1; transform:scale(1); }
 
-/* About Section */
-.about-section { background: var(--color-surface); }
-.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); align-items: center; }
-.about-image-wrap { position: relative; }
-.about-image-wrap img { width: 100%; height: 480px; object-fit: cover; border-radius: var(--radius-xl); }
-.about-badge { position: absolute; bottom: -24px; right: -24px; background: var(--brand-primary); color: #fff; border-radius: var(--radius-lg); padding: var(--space-5) var(--space-6); box-shadow: var(--shadow-xl); min-width: 160px; }
-.about-badge-num { font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: var(--brand-accent); line-height: 1; letter-spacing: -0.04em; }
-.about-text { padding-left: var(--space-4); }
-.check-item { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-sm); font-weight: 500; color: var(--color-text-body); }
-.check-item i { width: 22px; height: 22px; border-radius: 50%; background: var(--brand-accent); color: var(--brand-primary); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; flex-shrink: 0; }
+/* readability scrim with subtle teal cast */
+.hp-hero-scrim{ position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(90deg, rgba(3,18,16,.92) 0%, rgba(3,18,16,.6) 42%, rgba(3,18,16,.3) 100%),
+    linear-gradient(0deg, rgba(3,18,16,.9) 0%, rgba(3,18,16,.1) 38%, transparent 68%),
+    radial-gradient(120% 90% at 82% 18%, rgba(13,148,136,.2), transparent 55%); }
 
-/* Services */
-.services-section { background: var(--color-surface-alt); }
-.services-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); }
-.service-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; transition: all var(--transition-base); position: relative; }
-.service-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--brand-accent); transform: scaleX(0); transform-origin: left; transition: transform var(--transition-base); }
-.service-card:hover { box-shadow: var(--shadow-xl); transform: translateY(-5px); border-color: transparent; }
-.service-card:hover::after { transform: scaleX(1); }
-.service-card-image { height: 180px; overflow: hidden; background: var(--color-surface-alt); }
-.service-card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s ease; filter: saturate(0.8); }
-.service-card:hover .service-card-image img { transform: scale(1.07); filter: saturate(1); }
-.service-icon-wrap { width: 48px; height: 48px; border-radius: var(--radius-md); background: var(--color-surface-alt); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--brand-primary); transition: background var(--transition-base); }
-.service-card:hover .service-icon-wrap { background: var(--brand-accent); }
+/* slide counter */
+.hp-hero-count{ position:absolute; top:calc(var(--navbar-height,116px) + 22px); right:38px; z-index:4;
+  font-family:var(--font-display,sans-serif); font-size:.82rem; letter-spacing:.28em; color:rgba(255,255,255,.55); }
+.hp-hero-count b{ color:#fff; font-weight:800; }
 
-/* Projects */
-.projects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
-.project-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; transition: all var(--transition-base); }
-.project-card:hover { box-shadow: var(--shadow-xl); transform: translateY(-6px); border-color: transparent; }
-.project-thumb { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--color-surface-alt); }
-.project-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
-.project-card:hover .project-thumb img { transform: scale(1.06); }
-.project-cat-badge { position: absolute; top: var(--space-4); left: var(--space-4); background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); padding: 4px 12px; border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600; color: var(--brand-primary); letter-spacing: 0.04em; }
+/* reusable liquid-glass surface */
+.hp-glass{ position:relative; isolation:isolate;
+  background:linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05));
+  -webkit-backdrop-filter:blur(18px) saturate(155%); backdrop-filter:blur(18px) saturate(155%);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 12px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.18); }
+.hp-glass::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:-1;
+  background:linear-gradient(180deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 44%); }
 
-/* Why Us */
-.why-section { background: var(--color-surface-alt); }
-.why-layout { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); align-items: center; }
-.why-quote-card { position: absolute; top: 32px; left: -28px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-xl); max-width: 240px; }
-.quote-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--brand-accent); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--brand-primary); font-family: var(--font-display); flex-shrink: 0; }
+.hp-hero-grid{ position:relative; z-index:3; width:100%; display:grid; grid-template-columns:1.08fr .92fr; gap:var(--space-12,3rem); align-items:stretch; }
+.hp-hero-text{ display:flex; flex-direction:column; align-items:flex-start; }
+.hp-hero-badge{ display:inline-flex; align-items:center; gap:10px; padding:9px 18px; border-radius:var(--radius-full,9999px); color:#fff; font-size:.74rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:var(--space-6,1.5rem); }
+.hp-hero-badge .dot{ width:8px; height:8px; border-radius:50%; background:var(--brand-secondary,#2DD4BF); box-shadow:0 0 0 4px rgba(45,212,191,.25); }
+.hp-hero h1{ font-family:var(--font-display,sans-serif); font-weight:900; font-size:clamp(2.6rem,5.4vw,4.6rem); line-height:1.02; color:#fff; text-shadow:0 2px 30px rgba(0,0,0,.55); margin:0 0 6px; }
+.hp-hero-sub{ font-family:var(--font-display,sans-serif); font-weight:800; font-size:clamp(2rem,4.6vw,3.7rem); line-height:1.05; color:var(--brand-secondary,#2DD4BF); text-shadow:0 2px 24px rgba(0,0,0,.45); margin-bottom:var(--space-6,1.5rem); }
+.hp-hero-sub .dot-sep{ color:#fff; }
+.hp-hero-copy{ max-width:520px; color:rgba(255,255,255,.92); font-weight:500; margin-bottom:var(--space-2,.5rem); text-shadow:0 1px 12px rgba(0,0,0,.45); }
+.hp-hero-copy.muted{ color:rgba(255,255,255,.66); font-weight:400; font-size:.95rem; margin-bottom:var(--space-8,2rem); }
+.hp-hero-actions{ display:flex; flex-wrap:wrap; gap:var(--space-4,1rem); margin-top:auto; }
+.hp-hero-actions .btn{ text-transform:uppercase; letter-spacing:.06em; font-weight:700; padding:15px 28px; }
+.hp-btn-glass{ display:inline-flex; align-items:center; gap:10px; padding:15px 28px; border-radius:var(--radius-md,12px); color:#fff; font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:.9rem; cursor:pointer; transition:transform .2s ease, background .2s ease; }
+.hp-btn-glass:hover{ transform:translateY(-2px); }
+.hp-hero-right{ display:flex; flex-direction:column; justify-content:space-between; gap:var(--space-6,1.5rem); }
 
-/* Blog */
-.blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
-.blog-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; transition: all var(--transition-base); }
-.blog-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); border-color: transparent; }
-.blog-thumb { aspect-ratio: 16/9; overflow: hidden; background: var(--color-surface-alt); }
-.blog-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
-.blog-card:hover .blog-thumb img { transform: scale(1.06); }
-.read-more { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--brand-primary); transition: gap var(--transition-fast); }
-.read-more:hover { gap: var(--space-3); }
+/* Hero data panel */
+.hp-hero-panel{ position:relative; border-radius:var(--radius-lg,22px); padding:24px 26px; color:#fff;
+  background:linear-gradient(150deg, rgba(13,148,136,.30), rgba(6,40,37,.42));
+  -webkit-backdrop-filter:blur(20px) saturate(150%); backdrop-filter:blur(20px) saturate(150%);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.2); }
+.hp-hero-panel::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,.18) 0%, transparent 38%); }
+.hp-panel-head{ display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+.hp-panel-head .pmark{ width:30px; height:30px; }
+.hp-panel-head .ptitle{ font-family:var(--font-display,sans-serif); font-weight:800; font-size:.95rem; letter-spacing:.02em; }
+.hp-panel-head .ptitle span{ color:var(--brand-secondary,#2DD4BF); display:block; font-size:.66rem; letter-spacing:.18em; }
+.hp-panel-stats{ display:grid; grid-template-columns:1fr 1fr; gap:18px 14px; margin-bottom:22px; }
+.hp-panel-stat .pn{ font-family:var(--font-display,sans-serif); font-weight:800; font-size:1.9rem; line-height:1; color:#fff; }
+.hp-panel-stat .pn .u{ color:var(--brand-secondary,#2DD4BF); }
+.hp-panel-stat .pl{ font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.6); margin-top:4px; }
+.hp-panel-active{ display:flex; align-items:center; gap:8px; font-size:.72rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--brand-secondary,#2DD4BF); margin-bottom:14px; }
+.hp-panel-active .dot{ width:7px; height:7px; border-radius:50%; background:var(--brand-secondary,#2DD4BF); box-shadow:0 0 0 4px rgba(45,212,191,.2); }
+.hp-bar-row{ margin-bottom:12px; }
+.hp-bar-top{ display:flex; justify-content:space-between; font-size:.78rem; color:rgba(255,255,255,.85); margin-bottom:6px; }
+.hp-bar-track{ height:5px; border-radius:4px; background:rgba(255,255,255,.12); overflow:hidden; }
+.hp-bar-fill{ height:100%; width:0; border-radius:4px; background:linear-gradient(90deg,var(--brand-primary,#0D9488),var(--brand-secondary,#2DD4BF)); transition:width 1.2s cubic-bezier(.2,.7,.2,1); }
 
-/* CTA */
-.cta-section { position: relative; overflow: hidden; text-align: center; padding-block: var(--space-24); }
-.cta-bg { position: absolute; inset: 0; z-index: 0; }
-.cta-bg img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.25) saturate(0.6); }
-.cta-content { position: relative; z-index: 1; }
-.cta-heading { font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3.25rem); font-weight: 800; color: #fff; letter-spacing: -0.03em; margin-bottom: var(--space-4); }
+/* Hero contact pills (glass) */
+.hp-hero-contact{ display:flex; gap:14px; flex-wrap:wrap; justify-content:flex-end; }
+.hp-hc-item{ display:flex; align-items:center; gap:14px; padding:14px 22px 14px 16px; border-radius:var(--radius-full,9999px); color:#fff; text-decoration:none; transition:transform .2s ease; }
+.hp-hc-item:hover{ transform:translateY(-2px); }
+.hp-hc-ic{ width:42px; height:42px; border-radius:50%; background:rgba(45,212,191,.18); border:1px solid rgba(45,212,191,.45); display:flex; align-items:center; justify-content:center; color:var(--brand-secondary,#2DD4BF); flex-shrink:0; }
+.hp-hc-item b{ display:block; font-size:1rem; font-weight:700; }
+.hp-scroll{ position:absolute; right:36px; bottom:26px; z-index:4; display:flex; align-items:center; gap:14px; font-family:var(--font-display,sans-serif); font-size:.62rem; letter-spacing:.34em; color:rgba(255,255,255,.7); font-weight:700; }
+.hp-scroll::after{ content:''; width:1px; height:48px; background:linear-gradient(to top, rgba(255,255,255,.7), rgba(255,255,255,0)); }
+.hp-scroll .dot{ position:absolute; right:0; top:-6px; width:5px; height:5px; border-radius:50%; background:var(--brand-secondary,#2DD4BF); animation:hpScroll 2.2s ease-in-out infinite; }
+@keyframes hpScroll{ 0%{ transform:translateY(0); opacity:0; } 30%{ opacity:1; } 100%{ transform:translateY(40px); opacity:0; } }
 
-/* Responsive */
-@media (max-width: 1024px) {
-    .about-grid, .why-layout { grid-template-columns: 1fr; }
-    .projects-grid, .blog-grid { grid-template-columns: repeat(2, 1fr); }
+/* ---------- RECENT PROJECTS ---------- */
+.hp-proj{ background:linear-gradient(180deg,#eaf5f3,#ffffff 240px); border-top:3px solid var(--brand-secondary,#2DD4BF); }
+.hp-proj-head{ text-align:center; max-width:680px; margin:0 auto var(--space-12,3rem); display:flex; flex-direction:column; align-items:center; gap:var(--space-4,1rem); }
+.hp-filters{ display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:var(--space-12,3rem); }
+.hp-filter{ padding:9px 20px; border-radius:var(--radius-full,9999px); border:1px solid var(--color-border,#E2EAE8); background:var(--color-surface,#fff); color:var(--color-text-body,#44524F); font-size:.84rem; font-weight:600; cursor:pointer; transition:all .2s ease; }
+.hp-filter:hover{ border-color:var(--brand-primary,#0D9488); color:var(--brand-primary,#0D9488); }
+.hp-filter.is-active{ background:var(--brand-primary,#0D9488); border-color:var(--brand-primary,#0D9488); color:#fff; }
+.hp-proj-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-6,1.5rem); }
+.hp-proj-card{ background:var(--color-surface,#fff); border:1px solid var(--color-border,#E2EAE8); border-radius:var(--radius-lg,18px); overflow:hidden; display:flex; flex-direction:column; transition:transform .3s ease, box-shadow .3s ease, opacity .3s ease; }
+.hp-proj-card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-lg); border-color:transparent; }
+.hp-proj-card.is-hidden{ display:none; }
+.hp-proj-thumb{ position:relative; aspect-ratio:4/3; overflow:hidden; background:var(--color-surface-alt,#F1F6F5); }
+.hp-proj-thumb img{ width:100%; height:100%; object-fit:cover; transition:transform .6s ease; }
+.hp-proj-card:hover .hp-proj-thumb img{ transform:scale(1.07); }
+.hp-proj-year{ position:absolute; top:14px; left:14px; background:rgba(255,255,255,.95); color:var(--color-text-heading,#0A1413); font-size:.72rem; font-weight:700; padding:4px 11px; border-radius:8px; }
+.hp-proj-cat{ position:absolute; bottom:14px; left:14px; background:rgba(255,255,255,.95); color:var(--brand-primary,#0D9488); font-size:.64rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:5px 11px; border-radius:6px; }
+.hp-proj-body{ padding:22px 22px 24px; display:flex; flex-direction:column; flex:1; }
+.hp-proj-client{ font-size:.66rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-muted,#7B8987); margin-bottom:6px; }
+.hp-proj-title{ font-family:var(--font-display,sans-serif); font-size:1.18rem; font-weight:800; color:var(--color-text-heading,#0A1413); margin-bottom:10px; }
+.hp-proj-desc{ font-size:.9rem; color:var(--color-text-body,#44524F); margin-bottom:18px; flex:1; }
+.hp-proj-link{ display:inline-flex; align-items:center; gap:8px; font-size:.84rem; font-weight:700; color:var(--brand-primary,#0D9488); margin-top:auto; }
+.hp-proj-link i{ transition:transform .2s ease; }
+.hp-proj-link:hover i{ transform:translateX(4px); }
+.hp-proj-empty{ grid-column:1/-1; text-align:center; padding:48px; color:var(--color-text-muted,#7B8987); }
+
+/* ---------- STATS ROW ---------- */
+.hp-stats{ padding-block:var(--space-12,3rem); }
+.hp-stats-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:var(--space-6,1.5rem); margin-bottom:var(--space-10,2.5rem); }
+.hp-stat{ text-align:center; padding:22px 16px; border:1px solid var(--color-border,#E2EAE8); border-radius:var(--radius-md,12px); background:var(--color-surface,#fff); }
+.hp-stat .v{ font-family:var(--font-display,sans-serif); font-weight:800; font-size:2.1rem; color:var(--brand-primary,#0D9488); line-height:1; }
+.hp-stat .v .stat-suffix{ color:var(--brand-primary,#0D9488); }
+.hp-stat .l{ font-size:.68rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-muted,#7B8987); margin-top:10px; }
+.hp-stats-cta{ text-align:center; }
+
+/* ---------- 8 CORE SERVICES ---------- */
+.hp-svc-band{ position:relative; padding-block:var(--space-16,4rem); text-align:center; color:#fff; overflow:hidden; }
+.hp-svc-band::before{ content:''; position:absolute; inset:0; background:linear-gradient(rgba(6,40,37,.86),rgba(6,40,37,.92)),
+  url('https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=1600&q=80&auto=format&fit=crop') center/cover; }
+.hp-svc-band-inner{ position:relative; z-index:1; }
+.hp-svc-eyebrow{ font-size:.72rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--brand-secondary,#2DD4BF); }
+.hp-svc-band h2{ font-family:var(--font-display,sans-serif); font-weight:800; font-size:clamp(2rem,4.2vw,3rem); color:#fff; text-transform:uppercase; margin:10px 0; }
+.hp-svc-band h2 .accent{ color:var(--brand-secondary,#2DD4BF); }
+.hp-svc-band p{ color:rgba(255,255,255,.7); max-width:560px; margin:0 auto; font-size:.95rem; }
+.hp-svc-wrap{ background:var(--color-surface-alt,#F1F6F5); padding-block:var(--space-16,4rem) var(--space-12,3rem); }
+.hp-svc-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:var(--space-5,1.25rem); }
+.hp-svc-card{ background:var(--color-surface,#fff); border:1px solid var(--color-border,#E2EAE8); border-radius:var(--radius-md,12px); overflow:hidden; display:flex; flex-direction:column; transition:transform .3s ease, box-shadow .3s ease; }
+.hp-svc-card:hover{ transform:translateY(-5px); box-shadow:var(--shadow-lg); border-color:transparent; }
+.hp-svc-thumb{ position:relative; height:130px; overflow:hidden; background:var(--color-surface-alt,#F1F6F5); }
+.hp-svc-thumb img{ width:100%; height:100%; object-fit:cover; transition:transform .6s ease; }
+.hp-svc-card:hover .hp-svc-thumb img{ transform:scale(1.08); }
+.hp-svc-ic{ position:absolute; left:14px; bottom:-16px; width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:.95rem; box-shadow:0 6px 14px rgba(6,52,47,.25); }
+.hp-svc-body{ padding:26px 18px 20px; display:flex; flex-direction:column; flex:1; }
+.hp-svc-body h3{ font-family:var(--font-display,sans-serif); font-size:.95rem; font-weight:700; color:var(--color-text-heading,#0A1413); margin-bottom:8px; }
+.hp-svc-body p{ font-size:.8rem; color:var(--color-text-body,#44524F); line-height:1.55; margin-bottom:14px; flex:1; }
+.hp-svc-link{ font-size:.78rem; font-weight:700; color:var(--brand-primary,#0D9488); display:inline-flex; align-items:center; gap:6px; margin-top:auto; }
+.hp-svc-link i{ transition:transform .2s ease; }
+.hp-svc-link:hover i{ transform:translateX(3px); }
+
+/* Promo bar */
+.hp-promo{ margin-top:var(--space-12,3rem); position:relative; border-radius:var(--radius-lg,18px); overflow:hidden;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:18px; padding:26px 34px; color:#fff;
+  background:linear-gradient(120deg, rgba(6,52,47,.95), rgba(10,72,66,.95)); }
+.hp-promo::after{ content:''; position:absolute; inset:0; background:url('https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=1400&q=80&auto=format&fit=crop') center/cover; opacity:.10; }
+.hp-promo-text{ position:relative; z-index:1; }
+.hp-promo-text .small{ font-size:.66rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--brand-secondary,#2DD4BF); }
+.hp-promo-text .big{ font-family:var(--font-display,sans-serif); font-size:1.5rem; font-weight:800; margin:4px 0 2px; }
+.hp-promo-text .big em{ color:var(--brand-accent,#E8902C); font-style:normal; }
+.hp-promo-text .note{ font-size:.82rem; color:rgba(255,255,255,.65); }
+.hp-promo .btn{ position:relative; z-index:1; }
+
+/* ---------- ABOUT ---------- */
+.hp-about{ background:var(--color-surface,#fff); }
+.hp-about-grid{ display:grid; grid-template-columns:1fr 1.1fr; gap:var(--space-16,4rem); align-items:center; }
+.hp-about-media{ position:relative; }
+.hp-about-media > img{ width:100%; height:440px; object-fit:cover; border-radius:var(--radius-lg,18px); }
+.hp-about-tag{ position:absolute; top:18px; left:18px; background:rgba(255,255,255,.95); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-md); }
+.hp-about-tag .ti{ width:30px; height:30px; border-radius:8px; background:var(--brand-primary,#0D9488); color:#fff; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+.hp-about-tag b{ display:block; font-size:.78rem; color:var(--color-text-heading,#0A1413); }
+.hp-about-tag span{ font-size:.66rem; color:var(--color-text-muted,#7B8987); }
+.hp-about-badge{ position:absolute; right:-18px; bottom:28px; background:var(--brand-primary,#0D9488); color:#fff; border-radius:var(--radius-md,12px); padding:18px 22px; text-align:center; box-shadow:var(--shadow-xl); }
+.hp-about-badge .n{ font-family:var(--font-display,sans-serif); font-size:1.9rem; font-weight:800; line-height:1; }
+.hp-about-badge .t{ font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; opacity:.9; margin-top:4px; }
+.hp-about-eyebrow{ font-size:.72rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--brand-primary,#0D9488); margin-bottom:14px; }
+.hp-about h2{ font-family:var(--font-display,sans-serif); font-weight:800; font-size:clamp(1.9rem,3.6vw,2.7rem); text-transform:uppercase; line-height:1.08; margin-bottom:18px; }
+.hp-about h2 .accent{ color:var(--brand-primary,#0D9488); }
+.hp-about p{ color:var(--color-text-body,#44524F); margin-bottom:16px; }
+.hp-about-checks{ display:grid; grid-template-columns:1fr 1fr; gap:12px 18px; margin:22px 0 26px; }
+.hp-check{ display:flex; align-items:center; gap:10px; font-size:.88rem; font-weight:500; color:var(--color-text-body,#44524F); }
+.hp-check i{ width:22px; height:22px; border-radius:50%; background:rgba(13,148,136,.12); color:var(--brand-primary,#0D9488); display:flex; align-items:center; justify-content:center; font-size:.62rem; flex-shrink:0; }
+.hp-about-actions{ display:flex; flex-wrap:wrap; gap:14px; }
+
+/* About stats strip */
+.hp-about-stats{ background:var(--color-surface,#fff); padding-bottom:var(--space-24,6rem); }
+.hp-about-stats-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:var(--space-6,1.5rem); }
+.hp-as{ text-align:center; padding:26px 16px; border:1px solid var(--color-border,#E2EAE8); border-radius:var(--radius-md,12px); }
+.hp-as .v{ font-family:var(--font-display,sans-serif); font-weight:800; font-size:2.2rem; color:var(--brand-primary,#0D9488); line-height:1; }
+.hp-as .v .stat-suffix{ color:var(--brand-primary,#0D9488); }
+.hp-as .l{ font-size:.66rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-muted,#7B8987); margin-top:10px; }
+
+/* ---------- GALLERY ---------- */
+.hp-gallery{ background:var(--color-surface-mint,#DFF1ED); }
+.hp-gal-head{ text-align:center; max-width:620px; margin:0 auto var(--space-12,3rem); display:flex; flex-direction:column; align-items:center; gap:var(--space-4,1rem); }
+.hp-gal-grid{ display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:170px; gap:14px; }
+.hp-gal-item{ position:relative; overflow:hidden; border-radius:var(--radius-md,12px); background:var(--color-surface,#fff); box-shadow:var(--shadow-sm); }
+.hp-gal-item img{ width:100%; height:100%; object-fit:cover; transition:transform .6s ease; }
+.hp-gal-item:hover img{ transform:scale(1.08); }
+.hp-gal-item::after{ content:'\f00e'; font-family:'Font Awesome 6 Free'; font-weight:900; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fff; background:rgba(6,52,47,.5); opacity:0; transition:opacity .3s ease; font-size:1.2rem; }
+.hp-gal-item:hover::after{ opacity:1; }
+.hp-gal-item.span2{ grid-column:span 2; grid-row:span 2; }
+.hp-gal-item.tall{ grid-row:span 2; }
+
+/* ---------- TESTIMONIALS ---------- */
+.hp-testi{ position:relative; color:#fff; padding-block:var(--space-24,6rem); overflow:hidden;
+  background:linear-gradient(150deg, #0a4a42 0%, #06342f 55%, #042824 100%); }
+.hp-testi-head{ text-align:center; max-width:560px; margin:0 auto var(--space-12,3rem); display:flex; flex-direction:column; align-items:center; gap:14px; }
+.hp-testi-head .hp-pill{ background:rgba(45,212,191,.14); color:var(--brand-secondary,#2DD4BF); }
+.hp-testi-head h2{ color:#fff; font-family:var(--font-display,sans-serif); font-weight:800; text-transform:uppercase; font-size:clamp(1.9rem,3.6vw,2.7rem); }
+.hp-testi-head p{ color:rgba(255,255,255,.65); font-size:.95rem; }
+.hp-testi-stage{ position:relative; max-width:760px; margin:0 auto; }
+.hp-testi-card{ background:var(--color-surface,#fff); color:var(--color-text-body,#44524F); border-radius:var(--radius-xl,28px); padding:46px 48px 40px; text-align:center; box-shadow:var(--shadow-xl); display:none; }
+.hp-testi-card.is-active{ display:block; animation:hpFade .5s ease; }
+@keyframes hpFade{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:none;} }
+.hp-testi-quote-mark{ font-family:Georgia,serif; font-size:3rem; line-height:.6; color:var(--brand-primary,#0D9488); }
+.hp-testi-stars{ color:var(--brand-accent,#E8902C); font-size:.95rem; letter-spacing:3px; margin:14px 0 18px; }
+.hp-testi-text{ font-size:1.05rem; font-style:italic; color:var(--color-text-heading,#0A1413); line-height:1.7; margin-bottom:26px; }
+.hp-testi-author{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+.hp-testi-avatar{ width:48px; height:48px; border-radius:50%; background:var(--brand-primary,#0D9488); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--font-display,sans-serif); font-weight:800; }
+.hp-testi-name{ font-weight:700; color:var(--color-text-heading,#0A1413); }
+.hp-testi-role{ font-size:.82rem; color:var(--color-text-muted,#7B8987); }
+.hp-testi-tag{ margin-top:6px; font-size:.62rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--brand-primary,#0D9488); }
+.hp-testi-nav{ position:absolute; top:50%; transform:translateY(-50%); width:42px; height:42px; border-radius:50%; border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.06); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s ease; }
+.hp-testi-nav:hover{ background:#fff; color:var(--brand-dark,#06342F); }
+.hp-testi-nav.prev{ left:-12px; }
+.hp-testi-nav.next{ right:-12px; }
+.hp-testi-dots{ display:flex; justify-content:center; gap:9px; margin-top:26px; }
+.hp-testi-dot{ width:9px; height:9px; border-radius:50%; border:none; background:rgba(255,255,255,.3); cursor:pointer; transition:all .2s ease; }
+.hp-testi-dot.is-active{ background:var(--brand-secondary,#2DD4BF); width:26px; border-radius:5px; }
+
+/* ---------- LATEST BLOGS ---------- */
+.hp-blog{ background:var(--color-surface-alt,#F1F6F5); }
+.hp-blog-head{ text-align:center; max-width:640px; margin:0 auto var(--space-12,3rem); display:flex; flex-direction:column; align-items:center; gap:var(--space-4,1rem); }
+.hp-blog-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-6,1.5rem); }
+.hp-blog-card{ background:var(--color-surface,#fff); border:1px solid var(--color-border,#E2EAE8); border-radius:var(--radius-lg,18px); overflow:hidden; display:flex; flex-direction:column; transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease; }
+.hp-blog-card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-lg); border-color:transparent; }
+.hp-blog-thumb{ position:relative; aspect-ratio:16/10; overflow:hidden; background:var(--color-surface-alt,#F1F6F5); }
+.hp-blog-thumb img{ width:100%; height:100%; object-fit:cover; transition:transform .6s ease; }
+.hp-blog-card:hover .hp-blog-thumb img{ transform:scale(1.07); }
+.hp-blog-badge{ position:absolute; top:14px; left:14px; background:rgba(255,255,255,.95); color:var(--brand-primary,#0D9488); font-size:.64rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:5px 11px; border-radius:6px; }
+.hp-blog-body{ padding:22px 22px 24px; display:flex; flex-direction:column; flex:1; }
+.hp-blog-meta{ display:flex; gap:16px; font-size:.72rem; color:var(--color-text-muted,#7B8987); margin-bottom:10px; }
+.hp-blog-meta span{ display:inline-flex; align-items:center; gap:6px; }
+.hp-blog-title{ font-family:var(--font-display,sans-serif); font-size:1.16rem; font-weight:800; line-height:1.3; margin-bottom:10px; }
+.hp-blog-title a{ color:var(--color-text-heading,#0A1413); text-decoration:none; transition:color .2s ease; }
+.hp-blog-title a:hover{ color:var(--brand-primary,#0D9488); }
+.hp-blog-excerpt{ font-size:.9rem; color:var(--color-text-body,#44524F); margin-bottom:18px; flex:1; }
+.hp-blog-link{ display:inline-flex; align-items:center; gap:8px; font-size:.84rem; font-weight:700; color:var(--brand-primary,#0D9488); margin-top:auto; text-decoration:none; }
+.hp-blog-link i{ transition:transform .2s ease; }
+.hp-blog-link:hover i{ transform:translateX(4px); }
+.hp-blog-cta{ text-align:center; margin-top:var(--space-12,3rem); }
+
+/* ---------- GET IN TOUCH ---------- */
+.hp-contact{ background:var(--color-surface,#fff); }
+.hp-contact-grid{ display:grid; grid-template-columns:1fr 1fr; gap:var(--space-16,4rem); align-items:start; }
+.hp-contact-eyebrow{ font-size:.72rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--brand-primary,#0D9488); margin-bottom:12px; }
+.hp-contact h2{ font-family:var(--font-display,sans-serif); font-weight:800; text-transform:uppercase; font-size:clamp(1.9rem,3.6vw,2.7rem); margin-bottom:14px; }
+.hp-contact h2 .accent{ color:var(--brand-primary,#0D9488); }
+.hp-contact-lead{ color:var(--color-text-muted,#7B8987); margin-bottom:26px; max-width:420px; }
+.hp-contact-info{ display:flex; flex-direction:column; gap:16px; margin-bottom:26px; }
+.hp-ci{ display:flex; align-items:center; gap:14px; }
+.hp-ci-ic{ width:42px; height:42px; border-radius:10px; background:rgba(13,148,136,.10); color:var(--brand-primary,#0D9488); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.hp-ci .lab{ font-size:.62rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--color-text-muted,#7B8987); }
+.hp-ci .val{ font-weight:600; color:var(--color-text-heading,#0A1413); }
+.hp-map{ border-radius:var(--radius-md,12px); overflow:hidden; border:1px solid var(--color-border,#E2EAE8); }
+.hp-map iframe{ display:block; width:100%; height:230px; border:0; }
+.hp-form-card{ background:var(--color-surface-alt,#F1F6F5); border:1px solid var(--color-border,#E2EAE8); border-radius:var(--radius-lg,18px); padding:32px; }
+.hp-form-card h3{ font-family:var(--font-display,sans-serif); font-weight:800; text-transform:uppercase; font-size:1.2rem; margin-bottom:20px; }
+.hp-form-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.hp-field{ margin-bottom:16px; }
+.hp-field label{ display:block; font-size:.66rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--color-text-muted,#7B8987); margin-bottom:6px; }
+.hp-field input, .hp-field select, .hp-field textarea{ width:100%; padding:12px 14px; border:1px solid var(--color-border,#E2EAE8); border-radius:var(--radius-sm,6px); background:var(--color-surface,#fff); font-family:var(--font-body,sans-serif); font-size:.9rem; color:var(--color-text-heading,#0A1413); transition:border-color .2s ease, box-shadow .2s ease; }
+.hp-field input:focus, .hp-field select:focus, .hp-field textarea:focus{ outline:none; border-color:var(--brand-primary,#0D9488); box-shadow:0 0 0 3px rgba(13,148,136,.12); }
+.hp-field textarea{ resize:vertical; min-height:96px; }
+.hp-form-submit{ width:100%; justify-content:center; }
+.hp-form-msg{ display:none; margin-top:14px; padding:12px 14px; border-radius:var(--radius-sm,6px); background:rgba(13,148,136,.10); color:var(--brand-primary,#0D9488); font-size:.86rem; font-weight:600; }
+.hp-form-msg.is-shown{ display:block; }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:1024px){
+  .hp-hero-grid, .hp-about-grid, .hp-contact-grid{ grid-template-columns:1fr; gap:var(--space-10,2.5rem); }
+  .hp-hero{ min-height:auto; }
+  .hp-hero-sub .dot-sep{ color:#fff; }
+  .hp-hero-contact{ justify-content:flex-start; }
+  .hp-hero-count{ right:20px; }
+  .hp-proj-grid, .hp-svc-grid, .hp-gal-grid, .hp-blog-grid{ grid-template-columns:repeat(2,1fr); }
+  .hp-stats-grid, .hp-about-stats-grid{ grid-template-columns:repeat(2,1fr); }
+  .hp-about-badge{ right:14px; }
 }
-@media (max-width: 768px) {
-    .stats-grid { grid-template-columns: 1fr; }
-    .stat-item { border-right: none; border-bottom: 1px solid var(--color-border); }
-    .services-grid { grid-template-columns: 1fr; }
-    .projects-grid, .blog-grid { grid-template-columns: 1fr; }
-    .hero-caption { display: none; }
+@media (max-width:640px){
+  .hp-scroll{ display:none; }
+  .hp-hero-count{ top:calc(var(--navbar-height,72px) + 14px); right:16px; }
+  .hp-hero-contact{ flex-direction:column; align-items:stretch; }
+  .hp-proj-grid, .hp-svc-grid, .hp-gal-grid, .hp-blog-grid, .hp-stats-grid, .hp-about-stats-grid, .hp-form-row{ grid-template-columns:1fr; }
+  .hp-panel-stats{ grid-template-columns:1fr 1fr; }
+  .hp-gal-grid{ grid-auto-rows:200px; }
+  .hp-gal-item.span2, .hp-gal-item.tall{ grid-column:auto; grid-row:auto; }
+  .hp-about-checks{ grid-template-columns:1fr; }
+  .hp-testi-card{ padding:34px 24px; }
+  .hp-testi-nav.prev{ left:4px; } .hp-testi-nav.next{ right:4px; }
+  .hp-promo{ flex-direction:column; align-items:flex-start; text-align:left; }
 }
 </style>
 
-<!-- Include Homepage Navbar -->
-<!--?php include __DIR__ . '/components/public/nav_home.php'; ?-->
+<main class="hp-main">
 
-<!-- Hero Section -->
-<section class="site-hero" id="hero">
-  <div class="hero-slides" aria-hidden="true">
-    <?php foreach ($heroSlides as $i => $slide): ?>
-      <div class="hero-slide <?php echo $i === 0 ? 'is-active' : ''; ?>" data-index="<?php echo $i; ?>">
-        <img src="<?php echo $slide['url']; ?>" alt="<?php echo htmlspecialchars($slide['caption']); ?>" loading="<?php echo $i === 0 ? 'eager' : 'lazy'; ?>">
-      </div>
-    <?php endforeach; ?>
-  </div>
-  <div class="hero-overlay" aria-hidden="true"></div>
-  <div class="hero-cursor-light" id="heroCursorLight" aria-hidden="true"></div>
-  <div class="hero-cursor" id="heroCursor" aria-hidden="true">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#C8F23C" stroke="#C8F23C" stroke-width="0.5" stroke-linejoin="round"/>
-    </svg>
-  </div>
-  <div class="hero-content">
+  <!-- ============ HERO ============ -->
+  <section class="hp-hero" id="home">
+    <div class="hp-hero-bg" aria-hidden="true">
+      <?php foreach ($heroSlides as $i => $hs): ?>
+      <div class="hp-hero-slide<?php echo $i === 0 ? ' is-active' : ''; ?>" style="background-image:url('<?php echo htmlspecialchars($hs); ?>')"></div>
+      <?php endforeach; ?>
+    </div>
+    <div class="hp-hero-scrim" aria-hidden="true"></div>
+    <span class="hp-hero-count" aria-hidden="true"><b id="heroSlideNo">01</b> / <?php echo str_pad((string)count($heroSlides), 2, '0', STR_PAD_LEFT); ?></span>
+
     <div class="container">
-      <h1 class="hero-heading">Strategy. Craft.<br><strong>Real Results.</strong></h1>
-      <p class="hero-sub">From brand positioning to full digital builds — we deliver creative solutions designed to increase visibility, engagement, and long-term growth.</p>
-      <div class="hero-dots" role="tablist" aria-label="Slideshow navigation">
-        <?php foreach ($heroSlides as $i => $s): ?>
-          <button class="hero-dot <?php echo $i === 0 ? 'is-active' : ''; ?>" data-slide="<?php echo $i; ?>" role="tab" aria-selected="<?php echo $i === 0 ? 'true' : 'false'; ?>" aria-label="Slide <?php echo $i + 1; ?>"></button>
-        <?php endforeach; ?>
-      </div>
-    </div>
-  </div>
-  <div class="hero-caption" id="heroCaption" aria-live="polite"><?php echo htmlspecialchars($heroSlides[0]['caption']); ?></div>
-  <a href="#stats-anchor" class="hero-scroll-btn" id="heroScrollBtn" aria-label="Scroll to next section">
-    <div class="scroll-mouse" aria-hidden="true"></div>
-    <span>Scroll</span>
-  </a>
-</section>
-<span id="stats-anchor" style="display:block;position:relative;top:0;"></span>
-
-<!-- Stats Section -->
-<section class="stats-section" id="stats-section">
-  <div class="container">
-    <div class="stats-grid reveal">
-      <div class="stat-item"><div class="stat-number" data-target="<?php echo $totalProjects; ?>"><?php echo $totalProjects; ?><span class="accent">+</span></div><div class="stat-label">Completed Projects</div><div class="stat-sub">Successfully delivered</div></div>
-      <div class="stat-item"><div class="stat-number" data-target="<?php echo $totalCategories; ?>"><?php echo $totalCategories; ?><span class="accent">+</span></div><div class="stat-label">Expertise Areas</div><div class="stat-sub">Across key categories</div></div>
-      <div class="stat-item"><div class="stat-number">100<span class="accent">%</span></div><div class="stat-label">Client Satisfaction</div><div class="stat-sub">Happy clients worldwide</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- About Section -->
-<section class="section about-section">
-  <div class="container">
-    <div class="about-grid">
-      <div class="about-image-wrap reveal">
-        <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=900&q=80" alt="Our team at work" loading="lazy">
-        <div class="about-badge"><div class="about-badge-num"><?php echo $totalProjects; ?>+</div><div class="about-badge-label">Projects delivered</div></div>
-      </div>
-      <div class="about-text reveal reveal-delay-2">
-        <p class="eyebrow">Who we are</p>
-        <h2>A team built around<br>outcomes, not output</h2>
-        <p>We're a team of strategists, designers, and developers who believe great digital work starts with a deep understanding of your goals — not a template. Every project we take on is treated as if it were our own.</p>
-        <div class="about-checks">
-          <div class="check-item"><i class="fa-solid fa-check"></i> Strategy-first approach to every engagement</div>
-          <div class="check-item"><i class="fa-solid fa-check"></i> Transparent process with no surprise costs</div>
-          <div class="check-item"><i class="fa-solid fa-check"></i> Measurable results, not just deliverables</div>
-          <div class="check-item"><i class="fa-solid fa-check"></i> Long-term partnerships over one-off projects</div>
-        </div>
-        <a href="/Ismano/public/projects/" class="btn btn--dark">See Our Work <i class="fa-solid fa-arrow-right"></i></a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Services Section -->
-<?php if (!empty($services)): ?>
-<section class="section services-section">
-  <div class="container">
-    <div class="services-grid">
-      <?php foreach ($services as $i => $svc): ?>
-        <div class="service-card reveal reveal-delay-<?php echo ($i % 4) + 1; ?>">
-          <div class="service-card-image"><img src="<?php echo $serviceImages[$i % count($serviceImages)]; ?>" alt="<?php echo htmlspecialchars($svc['title']); ?>" loading="lazy"></div>
-          <div class="service-card-body">
-            <div class="service-icon-wrap"><i class="<?php echo serviceIcon($svc['title'], $serviceIcons); ?>"></i></div>
-            <h3 class="service-title"><?php echo htmlspecialchars($svc['title']); ?></h3>
-            <p class="service-desc"><?php echo htmlspecialchars(mb_strimwidth($svc['short_description'] ?? '', 0, 120, '…')); ?></p>
-            <a href="/Ismano/public/services/readmore.php?slug=<?php echo urlencode($svc['slug']); ?>" class="service-link-arrow">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+      <div class="hp-hero-grid">
+        <div class="hp-hero-text reveal">
+          <span class="hp-hero-badge hp-glass"><span class="dot"></span> 350+ Projects Delivered</span>
+          <h1>ISMAN Engineering</h1>
+          <p class="hp-hero-sub">Stainless <span class="dot-sep">·</span> Welding <span class="dot-sep">·</span> Food <span class="dot-sep">·</span> Kitchens</p>
+          <p class="hp-hero-copy">Railings, welding, food processing lines &amp; commercial kitchens — engineered for Kenyan industry.</p>
+          <p class="hp-hero-copy muted">Serving Nairobi and across East Africa with precision metalwork and industrial fit-outs.</p>
+          <div class="hp-hero-actions">
+            <a href="#contact" class="btn btn--primary"><i class="far fa-calendar-check"></i> Book a Consultation</a>
+            <a href="#services" class="hp-btn-glass hp-glass">Explore Services <i class="fa-solid fa-arrow-right"></i></a>
           </div>
         </div>
-      <?php endforeach; ?>
-    </div>
-  </div>
-</section>
-<?php endif; ?>
 
-<!-- Featured Projects Section -->
-<section class="section projects-section" id="featured">
-  <div class="container">
-    <div class="projects-header"><div><p class="eyebrow">Our work</p><h2 style="margin:0;">Featured Projects</h2></div><?php if (!empty($featuredProjects)): ?><a href="/Ismano/public/projects/" class="btn btn--outline">All Projects <i class="fa-solid fa-arrow-right"></i></a><?php endif; ?></div>
-    <div class="projects-grid">
-      <?php if (empty($featuredProjects)): ?>
-        <div class="empty-state"><i class="fa-regular fa-folder-open"></i><p>No projects published yet. Check back soon!</p></div>
-      <?php else: ?>
-        <?php foreach ($featuredProjects as $i => $p): ?>
-          <div class="project-card reveal reveal-delay-<?php echo ($i % 3) + 1; ?>">
-            <div class="project-thumb">
-              <?php if (!empty($p['cover_image'])): ?>
-                <img src="<?php echo htmlspecialchars($p['cover_image']); ?>" alt="<?php echo htmlspecialchars($p['small_title']); ?>" loading="lazy">
-              <?php else: ?>
-                <div style="width:100%;height:100%;background:linear-gradient(135deg,#f0f0ec,#e0e0d8);display:flex;align-items:center;justify-content:center;"><i class="fa-regular fa-image" style="font-size:2rem;color:var(--color-border);"></i></div>
-              <?php endif; ?>
-              <?php if (!empty($p['category_name'])): ?><span class="project-cat-badge"><?php echo htmlspecialchars($p['category_name']); ?></span><?php endif; ?>
+        <div class="hp-hero-right">
+          <div class="hp-hero-panel reveal reveal-delay-2" id="heroPanel">
+            <div class="hp-panel-head">
+              <svg class="pmark" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M24 4l3.2 4.1 5-1.7 1.1 5.2 5.2 1.1-1.7 5L46 24l-4.1 3.2 1.7 5-5.2 1.1-1.1 5.2-5-1.7L24 44l-3.2-4.1-5 1.7-1.1-5.2-5.2-1.1 1.7-5L2 24l4.1-3.2-1.7-5 5.2-1.1L10.7 9.4l5 1.7L24 4z" fill="#2DD4BF"/>
+                <circle cx="24" cy="24" r="9" fill="#06342F"/>
+              </svg>
+              <div class="ptitle">ISMAN<span>ENGINEERING</span></div>
             </div>
-            <div class="project-body"><div class="project-subtitle"><?php echo htmlspecialchars($p['major_title'] ?? ''); ?></div><h3 class="project-title"><?php echo htmlspecialchars($p['small_title']); ?></h3><p class="project-excerpt"><?php echo htmlspecialchars(mb_strimwidth(strip_tags($p['description'] ?? ''), 0, 100, '…')); ?></p></div>
-            <div class="project-footer"><div class="project-footer-meta"><span><i class="fa-regular fa-eye"></i> <?php echo number_format($p['view_count'] ?? 0); ?></span><span><i class="fa-regular fa-calendar"></i> <?php echo date('M Y', strtotime($p['created_at'])); ?></span></div><a href="/Ismano/public/projects/readmore.php?id=<?php echo (int)$p['id']; ?>" class="project-view-btn">View <i class="fa-solid fa-arrow-right"></i></a></div>
+            <div class="hp-panel-stats">
+              <div class="hp-panel-stat"><div class="pn"><span class="stat-count" data-target="350">0</span><span class="u">+</span></div><div class="pl">Projects Completed</div></div>
+              <div class="hp-panel-stat"><div class="pn"><span class="stat-count" data-target="15">0</span><span class="u">+</span></div><div class="pl">Years Experience</div></div>
+              <div class="hp-panel-stat"><div class="pn"><span class="stat-count" data-target="98">0</span><span class="u">%</span></div><div class="pl">Client Satisfaction</div></div>
+              <div class="hp-panel-stat"><div class="pn">24<span class="u">/7</span></div><div class="pl">Support</div></div>
+            </div>
+            <div class="hp-panel-active"><span class="dot"></span> Active Projects in Kenya</div>
+            <?php foreach ($heroBars as $bar): ?>
+            <div class="hp-bar-row">
+              <div class="hp-bar-top"><span><?php echo htmlspecialchars($bar['label']); ?></span><span><?php echo (int)$bar['pct']; ?>%</span></div>
+              <div class="hp-bar-track"><div class="hp-bar-fill" data-pct="<?php echo (int)$bar['pct']; ?>"></div></div>
+            </div>
+            <?php endforeach; ?>
           </div>
-        <?php endforeach; ?>
-      <?php endif; ?>
-    </div>
-  </div>
-</section>
 
-<!-- Why Us Section -->
-<section class="section why-section">
-  <div class="container">
-    <div class="why-layout">
-      <div class="why-image-col reveal">
-        <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=900&q=80" alt="Strategy planning session" loading="lazy">
-        <div class="why-quote-card"><p class="quote-text">"The results exceeded everything we expected in year one."</p><div class="quote-author"><div class="quote-avatar">JM</div><div><strong style="display:block;color:var(--color-text-heading);font-size:11px;">James M.</strong><span>Client, 2024</span></div></div></div>
-      </div>
-      <div class="reveal reveal-delay-2">
-        <p class="eyebrow">Why work with us</p>
-        <h2>What sets us apart<br>from the rest</h2>
-        <div class="why-list">
-          <div class="why-item"><div class="why-number">01</div><div class="why-content"><h4>Focused on what truly matters</h4><p>We prioritise performance, growth, and long-term value — every effort contributes to meaningful business results.</p></div></div>
-          <div class="why-item"><div class="why-number">02</div><div class="why-content"><h4>Driven by insight, not assumptions</h4><p>Every decision is backed by data and real customer understanding so your strategy is grounded in what works.</p></div></div>
-          <div class="why-item"><div class="why-number">03</div><div class="why-content"><h4>Committed to long-term success</h4><p>We don't chase quick wins. We build strategies designed to grow with your business and deliver sustainable results.</p></div></div>
-          <div class="why-item"><div class="why-number">04</div><div class="why-content"><h4>Transparent and communicative</h4><p>Clear timelines, honest updates, no surprises — you always know exactly where your project stands.</p></div></div>
+          <div class="hp-hero-contact reveal reveal-delay-3">
+            <a class="hp-hc-item hp-glass" href="tel:<?php echo preg_replace('/\s+/', '', $brand['phone']); ?>">
+              <span class="hp-hc-ic"><i class="fas fa-phone-volume"></i></span>
+              <b><?php echo htmlspecialchars($brand['phone']); ?></b>
+            </a>
+            <a class="hp-hc-item hp-glass" href="mailto:<?php echo htmlspecialchars($brand['email']); ?>">
+              <span class="hp-hc-ic"><i class="fas fa-envelope"></i></span>
+              <b><?php echo htmlspecialchars($brand['email']); ?></b>
+            </a>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+    <span class="hp-scroll">SCROLL<span class="dot"></span></span>
+  </section>
 
-<!-- Blog Section -->
-<?php if (!empty($blogs)): ?>
-<section class="section blog-section">
-  <div class="container">
-    <div class="blog-header"><div><p class="eyebrow">From our blog</p><h2 style="margin:0;">Latest insights</h2></div><a href="/Ismano/public/blogs/" class="btn btn--outline">All Articles <i class="fa-solid fa-arrow-right"></i></a></div>
-    <div class="blog-grid">
-      <?php foreach ($blogs as $i => $blog): ?>
-        <article class="blog-card reveal reveal-delay-<?php echo ($i % 3) + 1; ?>">
-          <div class="blog-thumb"><?php if (!empty($blog['featured_image'])): ?><img src="<?php echo htmlspecialchars($blog['featured_image']); ?>" alt="<?php echo htmlspecialchars($blog['title']); ?>" loading="lazy"><?php else: ?><img src="https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=600&q=70" alt="Blog post" loading="lazy"><?php endif; ?></div>
-          <div class="blog-body"><div class="blog-meta"><?php if (!empty($blog['category_name'])): ?><span class="tag tag--muted"><?php echo htmlspecialchars($blog['category_name']); ?></span><?php endif; ?><span class="blog-date"><i class="fa-regular fa-calendar"></i> <?php echo date('M d, Y', strtotime($blog['published_at'] ?? $blog['created_at'])); ?></span></div><h3 class="blog-title"><a href="/Ismano/public/blogs/readmore.php?slug=<?php echo urlencode($blog['slug']); ?>"><?php echo htmlspecialchars($blog['title']); ?></a></h3><p class="blog-excerpt"><?php echo htmlspecialchars(mb_strimwidth($blog['excerpt'] ?? strip_tags($blog['content'] ?? ''), 0, 120, '…')); ?></p><a href="/Ismano/public/blogs/readmore.php?slug=<?php echo urlencode($blog['slug']); ?>" class="read-more">Read more <i class="fa-solid fa-arrow-right"></i></a></div>
-        </article>
-      <?php endforeach; ?>
+  <!-- ============ RECENT PROJECTS ============ -->
+  <section class="hp-section hp-proj" id="projects">
+    <div class="container">
+      <div class="hp-proj-head reveal">
+        <span class="hp-pill"><span class="dot"></span> Trusted by Industry Leaders</span>
+        <h2 class="hp-h2">Recent <span class="accent">Projects</span></h2>
+        <p class="hp-lead">A curated selection of our latest engineering projects delivered across Kenya and East Africa.</p>
+      </div>
+
+      <div class="hp-filters reveal" role="tablist" aria-label="Filter projects by category">
+        <?php $first = true; foreach ($projectFilters as $slug => $label): ?>
+          <button class="hp-filter <?php echo $first ? 'is-active' : ''; ?>" data-filter="<?php echo htmlspecialchars($slug); ?>" role="tab" aria-selected="<?php echo $first ? 'true':'false'; ?>"><?php echo htmlspecialchars($label); ?></button>
+        <?php $first = false; endforeach; ?>
+      </div>
+
+      <div class="hp-proj-grid" id="projGrid">
+        <?php foreach ($projects as $i => $p):
+          $plink = !empty($p['id']) ? 'projects/readmore.php?id=' . (int)$p['id'] : '#contact'; ?>
+          <article class="hp-proj-card reveal reveal-delay-<?php echo ($i % 3) + 1; ?>" data-cat="<?php echo htmlspecialchars($p['cat']); ?>">
+            <div class="hp-proj-thumb">
+              <img src="<?php echo ismanImg($p['img']); ?>" alt="<?php echo htmlspecialchars($p['title']); ?>" loading="lazy" onerror="ismanImgFallback(this)">
+              <span class="hp-proj-year"><?php echo htmlspecialchars($p['year']); ?></span>
+              <span class="hp-proj-cat"><?php echo htmlspecialchars($p['catLabel']); ?></span>
+            </div>
+            <div class="hp-proj-body">
+              <?php if (!empty($p['client'])): ?><div class="hp-proj-client"><?php echo htmlspecialchars($p['client']); ?></div><?php endif; ?>
+              <h3 class="hp-proj-title"><?php echo htmlspecialchars($p['title']); ?></h3>
+              <p class="hp-proj-desc"><?php echo htmlspecialchars($p['desc']); ?></p>
+              <a class="hp-proj-link" href="<?php echo $plink; ?>">View Case Study <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+          </article>
+        <?php endforeach; ?>
+        <div class="hp-proj-empty" id="projEmpty" hidden>No projects in this category yet — check back soon.</div>
+      </div>
     </div>
-  </div>
-</section>
-<?php endif; ?>
+  </section>
 
-<!-- CTA Section -->
-<section class="cta-section">
-  <div class="cta-bg" aria-hidden="true"><img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1920&q=80" alt="" loading="lazy"></div>
-  <div class="container cta-content">
-    <p class="eyebrow cta-eyebrow">Ready to grow?</p>
-    <h2 class="cta-heading">Ready to start your project?</h2>
-    <p class="cta-sub">Let's create something extraordinary together. No pressure — just an honest conversation.</p>
-    <div class="cta-actions"><a href="/Ismano/public/auth/register.php" class="btn btn--primary">Get Started <i class="fa-solid fa-arrow-right"></i></a><a href="/Ismano/public/projects/" class="btn btn--outline-inv">Browse Portfolio</a></div>
-    <p class="cta-note">We'll respond within <strong>24 hours</strong>. No commitment required.</p>
-  </div>
-</section>
+  <!-- ============ STATS ROW ============ -->
+  <section class="hp-stats">
+    <div class="container">
+      <div class="hp-stats-grid reveal">
+        <?php foreach ($stats as $s): ?>
+          <div class="hp-stat"><div class="v"><?php echo statNum($s['num'], $s['suffix']); ?></div><div class="l"><?php echo htmlspecialchars($s['label']); ?></div></div>
+        <?php endforeach; ?>
+      </div>
+      <div class="hp-stats-cta reveal">
+        <a href="projects/" class="btn btn--primary"><i class="fa-solid fa-folder-open"></i> Explore All Projects</a>
+      </div>
+    </div>
+  </section>
 
-<!-- Homepage Scripts -->
+  <!-- ============ CORE SERVICES ============ -->
+  <section id="services">
+    <div class="hp-svc-band">
+      <div class="container hp-svc-band-inner reveal">
+        <p class="hp-svc-eyebrow">What we do</p>
+        <h2>Our <span class="accent">Core</span> Services</h2>
+        <p>End-to-end engineering solutions — from concept to commissioning and ongoing maintenance.</p>
+      </div>
+    </div>
+    <div class="hp-svc-wrap">
+      <div class="container">
+        <div class="hp-svc-grid">
+          <?php foreach ($services as $i => $svc):
+            $slink = !empty($svc['slug']) ? 'services/readmore.php?slug=' . urlencode($svc['slug']) : '#contact'; ?>
+            <article class="hp-svc-card reveal reveal-delay-<?php echo ($i % 4) + 1; ?>">
+              <div class="hp-svc-thumb">
+                <img src="<?php echo ismanImg($svc['img']); ?>" alt="<?php echo htmlspecialchars($svc['title']); ?>" loading="lazy" onerror="ismanImgFallback(this)">
+                <span class="hp-svc-ic" style="background:<?php echo htmlspecialchars($svc['color']); ?>;"><i class="fa-solid <?php echo htmlspecialchars($svc['icon']); ?>"></i></span>
+              </div>
+              <div class="hp-svc-body">
+                <h3><?php echo htmlspecialchars($svc['title']); ?></h3>
+                <p><?php echo htmlspecialchars($svc['desc']); ?></p>
+                <a class="hp-svc-link" href="<?php echo $slink; ?>">View Details <i class="fa-solid fa-arrow-right"></i></a>
+              </div>
+            </article>
+          <?php endforeach; ?>
+        </div>
+
+        <div class="hp-promo reveal">
+          <div class="hp-promo-text">
+            <div class="small">Limited time offer</div>
+            <div class="big">Save Up To <em>20% OFF</em> on All Services</div>
+            <div class="note">Contact us today — offer valid while slots last.</div>
+          </div>
+          <a href="#contact" class="btn btn--accent"><i class="far fa-calendar-check"></i> Book Now</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="hp-section hp-about" id="about">
+    <div class="container">
+      <div class="hp-about-grid">
+        <div class="hp-about-media reveal">
+          <img src="https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=900&q=80&auto=format&fit=crop" alt="ISMAN engineering workshop floor" loading="lazy" onerror="ismanImgFallback(this)">
+          <div class="hp-about-tag">
+            <span class="ti"><i class="fa-solid fa-certificate"></i></span>
+            <span><b>ISO-Grade Fabrication</b><span>SS304 · SS316 · Custom Build</span></span>
+          </div>
+          <div class="hp-about-badge"><div class="n">15+</div><div class="t">Years of Excellence</div></div>
+        </div>
+        <div class="hp-about-text reveal reveal-delay-2">
+          <p class="hp-about-eyebrow">About ISMAN</p>
+          <h2>Engineering <span class="accent">Excellence</span> in Kenya</h2>
+          <p>ISMAN Engineering Company is a leading provider of integrated engineering solutions in Kenya. We specialise in commercial kitchen systems, HVAC, plumbing, welding and more — delivering precision-engineered results that stand the test of time.</p>
+          <p>Our mission is simple: we provide solutions and take away your worries. From initial concept and 3D design to full installation and ongoing maintenance, our expert team is with you every step of the way.</p>
+          <div class="hp-about-checks">
+            <div class="hp-check"><i class="fa-solid fa-check"></i> Certified and experienced engineering team</div>
+            <div class="hp-check"><i class="fa-solid fa-check"></i> End-to-end service from design to maintenance</div>
+            <div class="hp-check"><i class="fa-solid fa-check"></i> Trusted by hospitals, hotels and food industries</div>
+            <div class="hp-check"><i class="fa-solid fa-check"></i> Competitive pricing with up to 20% savings</div>
+          </div>
+          <div class="hp-about-actions">
+            <a href="#contact" class="btn btn--primary">Get in Touch <i class="fa-solid fa-arrow-right"></i></a>
+            <a href="#projects" class="btn btn--outline">Company Profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About stats strip -->
+  <section class="hp-about-stats">
+    <div class="container">
+      <div class="hp-about-stats-grid reveal">
+        <?php foreach ($aboutStats as $s): ?>
+          <div class="hp-as"><div class="v"><?php echo statNum($s['num'], $s['suffix']); ?></div><div class="l"><?php echo htmlspecialchars($s['label']); ?></div></div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GALLERY ============ -->
+  <section class="hp-section hp-gallery" id="gallery">
+    <div class="container">
+      <div class="hp-gal-head reveal">
+        <span class="hp-pill">Our Portfolio</span>
+        <h2 class="hp-h2">Project <span class="accent">Gallery</span></h2>
+        <p class="hp-lead">A snapshot of our completed engineering projects across Kenya — from HVAC to commercial kitchens and beyond.</p>
+      </div>
+      <div class="hp-gal-grid reveal">
+        <?php foreach ($gallery as $i => $img):
+          $cls = ($i === 0) ? 'span2' : (($i === 4) ? 'tall' : ''); ?>
+          <a class="hp-gal-item <?php echo $cls; ?>" href="<?php echo $img; ?>" target="_blank" rel="noopener" aria-label="View project image">
+            <img src="<?php echo $img; ?>" alt="ISMAN project gallery image <?php echo $i + 1; ?>" loading="lazy" onerror="ismanImgFallback(this)">
+          </a>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS ============ -->
+  <section class="hp-testi">
+    <div class="container">
+      <div class="hp-testi-head reveal">
+        <span class="hp-pill">Client Stories</span>
+        <h2>What Our Clients Say</h2>
+        <p>Direct feedback from the decision-makers we partner with every day.</p>
+      </div>
+      <div class="hp-testi-stage reveal">
+        <button class="hp-testi-nav prev" id="testiPrev" aria-label="Previous testimonial"><i class="fa-solid fa-chevron-left"></i></button>
+        <div id="testiTrack">
+          <?php foreach ($testimonials as $i => $t): ?>
+            <figure class="hp-testi-card <?php echo $i === 0 ? 'is-active' : ''; ?>" data-index="<?php echo $i; ?>">
+              <div class="hp-testi-quote-mark">&ldquo;</div>
+              <div class="hp-testi-stars" aria-label="5 out of 5 stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+              <blockquote class="hp-testi-text"><?php echo htmlspecialchars($t['quote']); ?></blockquote>
+              <figcaption class="hp-testi-author">
+                <span class="hp-testi-avatar"><?php echo htmlspecialchars($t['initial']); ?></span>
+                <span class="hp-testi-name"><?php echo htmlspecialchars($t['name']); ?></span>
+                <span class="hp-testi-role"><?php echo htmlspecialchars($t['role']); ?></span>
+                <span class="hp-testi-tag"><?php echo htmlspecialchars($t['tag']); ?></span>
+              </figcaption>
+            </figure>
+          <?php endforeach; ?>
+        </div>
+        <button class="hp-testi-nav next" id="testiNext" aria-label="Next testimonial"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="hp-testi-dots" id="testiDots">
+        <?php foreach ($testimonials as $i => $t): ?>
+          <button class="hp-testi-dot <?php echo $i === 0 ? 'is-active' : ''; ?>" data-dot="<?php echo $i; ?>" aria-label="Go to testimonial <?php echo $i + 1; ?>"></button>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+
+  <?php if (!empty($blogs)): ?>
+  <!-- ============ LATEST BLOGS ============ -->
+  <section class="hp-section hp-blog" id="blog">
+    <div class="container">
+      <div class="hp-blog-head reveal">
+        <span class="hp-pill"><span class="dot"></span> From the Workshop</span>
+        <h2 class="hp-h2">Latest <span class="accent">Insights</span></h2>
+        <p class="hp-lead">News, technical notes and project stories from the ISMAN engineering team.</p>
+      </div>
+      <div class="hp-blog-grid">
+        <?php foreach ($blogs as $i => $b):
+          $bImg     = (string)($b['featured_image'] ?? '');
+          $bExcerpt = trim(strip_tags((string)($b['excerpt'] ?? '')));
+          if ($bExcerpt === '') { $bExcerpt = trim(strip_tags((string)($b['content'] ?? ''))); }
+          $bExcerpt = mb_strimwidth($bExcerpt, 0, 120, '…');
+          $bDate    = $b['published_at'] ?? ($b['created_at'] ?? null);
+          $bSlug    = (string)($b['slug'] ?? '');
+          $bLink    = $bSlug !== '' ? 'blogs/readmore.php?slug=' . urlencode($bSlug) : '#'; ?>
+        <article class="hp-blog-card reveal reveal-delay-<?php echo ($i % 3) + 1; ?>">
+          <div class="hp-blog-thumb">
+            <img src="<?php echo ismanImg($bImg); ?>" alt="<?php echo htmlspecialchars($b['title'] ?? 'Blog post'); ?>" loading="lazy" onerror="ismanImgFallback(this)">
+            <?php if (!empty($b['category_name'])): ?>
+              <span class="hp-blog-badge"><?php echo htmlspecialchars($b['category_name']); ?></span>
+            <?php endif; ?>
+          </div>
+          <div class="hp-blog-body">
+            <div class="hp-blog-meta">
+              <?php if ($bDate): ?><span><i class="fa-regular fa-calendar"></i> <?php echo date('M d, Y', strtotime($bDate)); ?></span><?php endif; ?>
+              <span><i class="fa-regular fa-eye"></i> <?php echo number_format((int)($b['view_count'] ?? 0)); ?></span>
+            </div>
+            <h3 class="hp-blog-title"><a href="<?php echo $bLink; ?>"><?php echo htmlspecialchars($b['title'] ?? 'Untitled'); ?></a></h3>
+            <p class="hp-blog-excerpt"><?php echo htmlspecialchars($bExcerpt); ?></p>
+            <a class="hp-blog-link" href="<?php echo $bLink; ?>">Read Article <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </article>
+        <?php endforeach; ?>
+      </div>
+      <div class="hp-blog-cta reveal">
+        <a href="blogs/" class="btn btn--primary"><i class="fa-regular fa-newspaper"></i> View All Articles</a>
+      </div>
+    </div>
+  </section>
+  <?php endif; ?>
+
+  <!-- ============ GET IN TOUCH ============ -->
+  <section class="hp-section hp-contact" id="contact">
+    <div class="container">
+      <div class="hp-contact-grid">
+        <div class="hp-contact-info-col reveal">
+          <p class="hp-contact-eyebrow">Get in Touch</p>
+          <h2>Book a <span class="accent">Service</span> Today</h2>
+          <p class="hp-contact-lead">Ready to start your engineering project? Contact our team and we'll get back to you within 24 hours. Save up to 20% on selected services.</p>
+          <div class="hp-contact-info">
+            <a class="hp-ci" href="tel:<?php echo preg_replace('/\s+/', '', $brand['phone']); ?>">
+              <span class="hp-ci-ic"><i class="fas fa-phone-volume"></i></span>
+              <span><span class="lab">Phone</span><span class="val"><?php echo htmlspecialchars($brand['phone']); ?></span></span>
+            </a>
+            <a class="hp-ci" href="mailto:<?php echo htmlspecialchars($brand['email']); ?>">
+              <span class="hp-ci-ic"><i class="fas fa-envelope"></i></span>
+              <span><span class="lab">Email</span><span class="val"><?php echo htmlspecialchars($brand['email']); ?></span></span>
+            </a>
+            <div class="hp-ci">
+              <span class="hp-ci-ic"><i class="fas fa-location-dot"></i></span>
+              <span><span class="lab">Location</span><span class="val"><?php echo htmlspecialchars($brand['loc']); ?></span></span>
+            </div>
+          </div>
+          <div class="hp-map">
+            <iframe title="ISMAN Company location — Nairobi, Kenya" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                    src="https://www.google.com/maps?q=Nairobi%2C%20Kenya&output=embed"></iframe>
+          </div>
+        </div>
+
+        <div class="hp-form-card reveal reveal-delay-2">
+          <h3>Book / Enquire Now</h3>
+          <!-- NOTE: front-end stub. Wire action to your PHP handler (e.g. /Ismano/public/contact/submit.php) to persist enquiries. -->
+          <form id="enquiryForm" novalidate>
+            <div class="hp-form-row">
+              <div class="hp-field">
+                <label for="ef-name">Full Name</label>
+                <input type="text" id="ef-name" name="name" placeholder="John Kamau" required>
+              </div>
+              <div class="hp-field">
+                <label for="ef-phone">Phone</label>
+                <input type="tel" id="ef-phone" name="phone" placeholder="072 411 XXXX" required>
+              </div>
+            </div>
+            <div class="hp-field">
+              <label for="ef-email">Email</label>
+              <input type="email" id="ef-email" name="email" placeholder="you@example.com" required>
+            </div>
+            <div class="hp-field">
+              <label for="ef-service">Service Required</label>
+              <select id="ef-service" name="service" required>
+                <option value="" selected disabled>Select a service</option>
+                <?php foreach ($serviceOptions as $opt): ?>
+                  <option value="<?php echo htmlspecialchars($opt); ?>"><?php echo htmlspecialchars($opt); ?></option>
+                <?php endforeach; ?>
+                <option value="Other">Other / Not sure</option>
+              </select>
+            </div>
+            <div class="hp-field">
+              <label for="ef-message">Message <span style="text-transform:none;letter-spacing:0;font-weight:400;">(max 500 chars)</span></label>
+              <textarea id="ef-message" name="message" maxlength="500" placeholder="Tell us about your project…"></textarea>
+            </div>
+            <button type="submit" class="btn btn--primary hp-form-submit"><i class="fa-solid fa-paper-plane"></i> Send Enquiry</button>
+            <p class="hp-form-msg" id="enquiryMsg" role="status">Thanks — your enquiry has been captured. Connect this form to your backend to start receiving leads.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
 <script>
 (function () {
-  const slides = document.querySelectorAll('.hero-slide');
-  const dots = document.querySelectorAll('.hero-dot');
-  const caption = document.getElementById('heroCaption');
-  const captions = <?php echo json_encode(array_column($heroSlides, 'caption')); ?>;
-  let current = 0, timer = null, isPaused = false;
-  function goTo(n) { slides[current].classList.remove('is-active'); dots[current].classList.remove('is-active'); dots[current].setAttribute('aria-selected', 'false'); current = (n + slides.length) % slides.length; slides[current].classList.add('is-active'); dots[current].classList.add('is-active'); dots[current].setAttribute('aria-selected', 'true'); if (caption) caption.textContent = captions[current]; }
-  function startTimer() { clearInterval(timer); timer = setInterval(() => goTo(current + 1), 5500); }
-  dots.forEach((dot, i) => { dot.addEventListener('click', () => { goTo(i); startTimer(); }); });
-  const hero = document.getElementById('hero');
-  hero.addEventListener('mouseenter', () => { clearInterval(timer); isPaused = true; });
-  hero.addEventListener('mouseleave', () => { if (isPaused) { startTimer(); isPaused = false; } });
-  startTimer();
+  'use strict';
 
-  const bolt = document.getElementById('heroCursor'), light = document.getElementById('heroCursorLight');
-  if (hero && bolt && light) {
-    let mouseX = 0, mouseY = 0, boltX = 0, boltY = 0, lightX = 0, lightY = 0, visible = false, raf = null;
-    hero.addEventListener('mouseenter', () => { visible = true; bolt.style.opacity = '1'; light.style.opacity = '1'; });
-    hero.addEventListener('mouseleave', () => { visible = false; bolt.style.opacity = '0'; light.style.opacity = '0'; });
-    hero.addEventListener('mousemove', e => { const rect = hero.getBoundingClientRect(); mouseX = e.clientX - rect.left; mouseY = e.clientY - rect.top; });
-    function tick() { boltX += (mouseX - boltX) * 0.18; boltY += (mouseY - boltY) * 0.18; lightX += (mouseX - lightX) * 0.08; lightY += (mouseY - lightY) * 0.08; bolt.style.transform = `translate(${boltX - 16}px, ${boltY - 16}px)`; light.style.transform = `translate(${lightX - 160}px, ${lightY - 160}px)`; raf = requestAnimationFrame(tick); }
-    raf = requestAnimationFrame(tick);
+  /* Branded image fallback — never show a broken-image icon. */
+  window.ismanImgFallback = function (img) {
+    img.onerror = null;
+    img.src = "data:image/svg+xml;utf8," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">' +
+      '<rect width="600" height="450" fill="#d7e4e2"/>' +
+      '<path d="M300 165l16 20 25-8 5 26 26 5-8 25 20 16-20 16 8 25-26 5-5 26-25-8-16 20-16-20-25 8-5-26-26-5 8-25-20-16 20-16-8-25 26-5 5-26 25 8z" fill="#0D9488" opacity="0.55"/>' +
+      '<circle cx="300" cy="225" r="34" fill="#d7e4e2"/>' +
+      '<text x="300" y="320" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="18" font-weight="700" fill="#0a766b">ISMAN ENGINEERING</text></svg>'
+    );
+  };
+
+  /* Hero background slideshow + slide counter (respects reduced-motion) */
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.hp-hero-slide'));
+    var counter = document.getElementById('heroSlideNo');
+    if (slides.length < 2) return;
+    var idx = 0;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    function go(next) {
+      slides[idx].classList.remove('is-active');
+      idx = (next + slides.length) % slides.length;
+      slides[idx].classList.add('is-active');
+      if (counter) counter.textContent = pad(idx + 1);
+    }
+    if (counter) counter.textContent = pad(1);
+    if (!reduce) setInterval(function () { go(idx + 1); }, 6000);
+  })();
+
+  /* Scroll reveal */
+  var revealIo = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('is-visible'); revealIo.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(function (el) { revealIo.observe(el); });
+
+  /* Number counters */
+  var easeOut = function (t) { return 1 - Math.pow(1 - t, 3); };
+  var countIo = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var el = entry.target;
+      var target = parseInt(el.dataset.target, 10);
+      if (isNaN(target)) { countIo.unobserve(el); return; }
+      var start = null, dur = 1500;
+      function step(ts) {
+        if (!start) start = ts;
+        var p = Math.min((ts - start) / dur, 1);
+        el.textContent = Math.floor(easeOut(p) * target).toLocaleString();
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = target.toLocaleString();
+      }
+      requestAnimationFrame(step);
+      countIo.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.stat-count').forEach(function (el) { countIo.observe(el); });
+
+  /* Hero progress bars */
+  var panel = document.getElementById('heroPanel');
+  if (panel) {
+    var barIo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.querySelectorAll('.hp-bar-fill').forEach(function (fill) {
+          fill.style.width = (parseInt(fill.dataset.pct, 10) || 0) + '%';
+        });
+        barIo.unobserve(e.target);
+      });
+    }, { threshold: 0.4 });
+    barIo.observe(panel);
   }
 
-  document.getElementById('heroScrollBtn')?.addEventListener('click', e => { e.preventDefault(); document.getElementById('stats-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  /* Project filter */
+  var filters = document.querySelectorAll('.hp-filter');
+  var cards   = document.querySelectorAll('.hp-proj-card');
+  var empty   = document.getElementById('projEmpty');
+  filters.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      filters.forEach(function (f) { f.classList.remove('is-active'); f.setAttribute('aria-selected', 'false'); });
+      btn.classList.add('is-active'); btn.setAttribute('aria-selected', 'true');
+      var f = btn.dataset.filter, shown = 0;
+      cards.forEach(function (c) {
+        var match = (f === 'all' || c.dataset.cat === f);
+        c.classList.toggle('is-hidden', !match);
+        if (match) shown++;
+      });
+      if (empty) empty.hidden = shown !== 0;
+    });
+  });
 
-  const ease = t => t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-  const io = new IntersectionObserver(entries => { entries.forEach(entry => { if (!entry.isIntersecting) return; const el = entry.target; const target = parseInt(el.dataset.target, 10); if (isNaN(target)) return; let start = null; function step(ts) { if (!start) start = ts; const p = Math.min((ts - start) / 1400, 1); el.firstChild.textContent = Math.floor(ease(p) * target).toLocaleString(); if (p < 1) requestAnimationFrame(step); else el.firstChild.textContent = target.toLocaleString(); } requestAnimationFrame(step); io.unobserve(el); }); }, { threshold: 0.5 });
-  document.querySelectorAll('.stat-number[data-target]').forEach(el => io.observe(el));
+  /* Testimonials carousel */
+  var tCards = Array.prototype.slice.call(document.querySelectorAll('.hp-testi-card'));
+  var tDots  = Array.prototype.slice.call(document.querySelectorAll('.hp-testi-dot'));
+  var tIndex = 0, tTimer = null;
+  function tGo(n) {
+    tCards[tIndex].classList.remove('is-active');
+    if (tDots[tIndex]) tDots[tIndex].classList.remove('is-active');
+    tIndex = (n + tCards.length) % tCards.length;
+    tCards[tIndex].classList.add('is-active');
+    if (tDots[tIndex]) tDots[tIndex].classList.add('is-active');
+  }
+  function tStart() { clearInterval(tTimer); tTimer = setInterval(function () { tGo(tIndex + 1); }, 6000); }
+  if (tCards.length) {
+    var prev = document.getElementById('testiPrev'), next = document.getElementById('testiNext');
+    if (prev) prev.addEventListener('click', function () { tGo(tIndex - 1); tStart(); });
+    if (next) next.addEventListener('click', function () { tGo(tIndex + 1); tStart(); });
+    tDots.forEach(function (d, i) { d.addEventListener('click', function () { tGo(i); tStart(); }); });
+    tStart();
+  }
 
-  const revealIo = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); revealIo.unobserve(e.target); } }); }, { threshold: 0.1 });
-  document.querySelectorAll('.reveal').forEach(el => revealIo.observe(el));
+  /* Enquiry form (front-end stub) */
+  var form = document.getElementById('enquiryForm');
+  var msg  = document.getElementById('enquiryMsg');
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      if (msg) msg.classList.add('is-shown');
+      form.reset();
+    });
+  }
 })();
 </script>
 
