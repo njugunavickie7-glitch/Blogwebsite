@@ -194,11 +194,12 @@ ob_start();
                 msg('Check your phone and enter your M-Pesa PIN…', 'success');
                 pollStatus(d.order_number, 0);
             } else {
-                msg(d.message || 'Could not start payment.', 'danger');
+                console.error('[checkout] initiate rejected:', d.message, d.hint || '');
+                msg((d.message || 'Could not start payment.') + (d.hint ? ' — ' + d.hint : ''), 'danger');
                 payBtn.disabled = false;
             }
         })
-        .catch(function () { msg('Network error. Please try again.', 'danger'); payBtn.disabled = false; });
+        .catch(function (e) { console.error('[checkout] network/parse error:', e); msg('Network error. Please try again.', 'danger'); payBtn.disabled = false; });
     });
 })();
 </script>

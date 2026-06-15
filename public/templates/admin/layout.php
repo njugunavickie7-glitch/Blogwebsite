@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Admin Panel - <?php echo $page_title ?? 'Ismano'; ?></title>
     
     <!-- Bootstrap CSS -->
@@ -25,7 +25,9 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* Black & White Admin Theme */
+        /* ============================================================
+           ADMIN THEME - FULLY RESPONSIVE
+        ============================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -36,15 +38,17 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f5f5f5;
             color: #1a1a1a;
+            overflow-x: hidden;
         }
         
         /* Admin Wrapper */
         .admin-wrapper {
             display: flex;
             min-height: 100vh;
+            position: relative;
         }
         
-        /* Sidebar Styles */
+        /* Sidebar Styles - Matches sidebar.php */
         .admin-sidebar {
             width: 280px;
             background: #1a1a1a;
@@ -54,88 +58,54 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
             top: 0;
             height: 100vh;
             overflow-y: auto;
-            transition: all 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
             box-shadow: 2px 0 10px rgba(0,0,0,0.05);
         }
         
-        .sidebar-header {
-            padding: 25px 20px;
-            border-bottom: 1px solid #333;
-            margin-bottom: 20px;
-        }
-        
-        .sidebar-header h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #fff;
-            margin: 0;
-        }
-        
-        .sidebar-header small {
-            font-size: 0.75rem;
-            color: #888;
-            margin-top: 8px;
-            display: block;
-        }
-        
-        .sidebar-nav {
-            padding: 0 15px;
-        }
-        
-        .sidebar-nav .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            color: #ccc;
-            text-decoration: none;
+        /* Sidebar Toggle Button (Mobile) */
+        .sidebar-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1002;
+            width: 45px;
+            height: 45px;
             border-radius: 8px;
-            margin-bottom: 4px;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
+            background: #1a1a1a;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         
-        .sidebar-nav .nav-link i {
-            width: 20px;
-            font-size: 1rem;
-            color: #888;
+        .sidebar-toggle:hover {
+            background: #333;
+            transform: scale(1.05);
         }
         
-        .sidebar-nav .nav-link:hover {
-            background: #2a2a2a;
-            color: #fff;
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        .sidebar-nav .nav-link:hover i {
-            color: #fff;
-        }
-        
-        .sidebar-nav .nav-link.active {
-            background: #2a2a2a;
-            color: #fff;
-        }
-        
-        .sidebar-nav .nav-link.active i {
-            color: #fff;
-        }
-        
-        .sidebar-nav .nav-link.text-danger {
-            color: #dc2626;
-        }
-        
-        .sidebar-nav .nav-link.text-danger:hover {
-            background: #dc2626;
-            color: #fff;
-        }
-        
-        .sidebar-nav .nav-link.text-danger:hover i {
-            color: #fff;
-        }
-        
-        .sidebar-nav hr {
-            border-color: #333;
-            margin: 15px 0;
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
         }
         
         /* Main Content Area */
@@ -145,6 +115,8 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
             padding: 25px 30px;
             min-height: 100vh;
             background: #f5f5f5;
+            transition: margin-left 0.3s ease;
+            width: calc(100% - 280px);
         }
         
         /* Top Bar */
@@ -155,6 +127,11 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
             margin-bottom: 25px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         .page-title {
@@ -185,6 +162,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
             font-weight: 500;
         }
         
+        /* User Dropdown */
         .user-dropdown .btn {
             background: #fff;
             border: 1px solid #e0e0e0;
@@ -244,6 +222,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
         }
         
         .card-header {
@@ -253,9 +232,14 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
             font-weight: 600;
         }
         
+        .card-body {
+            padding: 20px;
+        }
+        
         /* Tables */
         .table {
             color: #1a1a1a;
+            margin-bottom: 0;
         }
         
         .table thead th {
@@ -263,6 +247,11 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
             border-bottom: 2px solid #e0e0e0;
             font-weight: 600;
             font-size: 0.85rem;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         /* Buttons */
@@ -287,53 +276,11 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
             color: #fff;
         }
         
-        /* Mobile Menu Toggle */
-        .mobile-menu-toggle {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #1a1a1a;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            z-index: 1001;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .mobile-menu-toggle:hover {
-            background: #333;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .admin-sidebar {
-                transform: translateX(-100%);
-                width: 280px;
-            }
-            
-            .admin-sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .admin-content {
-                margin-left: 0;
-                padding: 15px;
-            }
-            
-            .mobile-menu-toggle {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .top-bar {
-                flex-direction: column;
-                gap: 15px;
-            }
+        /* Form Controls */
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #1a1a1a;
+            box-shadow: 0 0 0 0.2rem rgba(0,0,0,0.1);
         }
         
         /* Scrollbar */
@@ -349,6 +296,238 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
             background: #444;
             border-radius: 3px;
         }
+        
+        .admin-sidebar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* ============================================================
+           RESPONSIVE BREAKPOINTS
+        ============================================================ */
+        
+        /* Tablet Landscape */
+        @media (max-width: 992px) {
+            .sidebar-toggle {
+                display: flex;
+            }
+            
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .admin-sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .admin-content {
+                margin-left: 0;
+                padding: 20px;
+                width: 100%;
+            }
+            
+            .top-bar {
+                margin-top: 55px;
+            }
+        }
+        
+        /* Tablet Portrait */
+        @media (max-width: 768px) {
+            .admin-content {
+                padding: 15px;
+            }
+            
+            .top-bar {
+                flex-direction: column;
+                align-items: stretch;
+                margin-top: 55px;
+                gap: 12px;
+            }
+            
+            .top-bar > div:first-child {
+                text-align: center;
+            }
+            
+            .user-dropdown {
+                text-align: center;
+            }
+            
+            .page-title {
+                font-size: 1.3rem;
+            }
+            
+            .breadcrumb {
+                justify-content: center;
+            }
+            
+            .card-header {
+                padding: 12px 15px;
+            }
+            
+            .card-body {
+                padding: 15px;
+            }
+            
+            /* Make tables scrollable on mobile */
+            .table-responsive {
+                margin: 0 -15px;
+                width: calc(100% + 30px);
+                padding: 0 15px;
+            }
+            
+            /* Adjust button sizes for mobile */
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+            }
+            
+            /* Form adjustments */
+            .form-control,
+            .form-select {
+                font-size: 16px; /* Prevents zoom on mobile */
+            }
+        }
+        
+        /* Mobile Small */
+        @media (max-width: 576px) {
+            .admin-content {
+                padding: 10px;
+            }
+            
+            .top-bar {
+                margin-top: 50px;
+                padding: 12px 15px;
+            }
+            
+            .page-title {
+                font-size: 1.2rem;
+            }
+            
+            .sidebar-toggle {
+                top: 10px;
+                left: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            
+            .card-header {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+            }
+            
+            .card-body {
+                padding: 12px;
+            }
+            
+            /* Stack buttons on mobile */
+            .btn-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .btn-group .btn {
+                width: 100%;
+                border-radius: 6px !important;
+            }
+            
+            /* Adjust modal for mobile */
+            .modal-dialog {
+                margin: 10px;
+            }
+            
+            .modal-body {
+                padding: 15px;
+            }
+        }
+        
+        /* Desktop Large */
+        @media (min-width: 1400px) {
+            .container-fluid {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+            
+            .admin-content {
+                padding: 30px 40px;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            .admin-sidebar,
+            .sidebar-toggle,
+            .user-dropdown,
+            .mobile-menu-toggle,
+            .btn,
+            .no-print {
+                display: none !important;
+            }
+            
+            .admin-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .card {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+        
+        /* Loading States */
+        .loading {
+            position: relative;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            margin: -15px 0 0 -15px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1a1a1a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Utility Classes */
+        .text-truncate-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        
+        /* Animation for content */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
     
     <?php if (isset($extra_css)): ?>
@@ -357,13 +536,21 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
 </head>
 <body>
     <div class="admin-wrapper">
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        
+        <!-- Sidebar Toggle Button (Mobile) -->
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
+        
         <!-- Include Admin Sidebar -->
         <?php include_once __DIR__ . '/../../components/admin/sidebar.php'; ?>
         
         <!-- Main Content Area -->
-        <div class="admin-content">
+        <div class="admin-content fade-in">
             <!-- Top Bar -->
-            <div class="top-bar d-flex justify-content-between align-items-center">
+            <div class="top-bar">
                 <div>
                     <h1 class="page-title"><?php echo $page_title ?? 'Dashboard'; ?></h1>
                     <?php if (isset($breadcrumbs)): ?>
@@ -384,17 +571,19 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
                     <?php endif; ?>
                 </div>
                 <div class="user-dropdown dropdown">
-                    <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user-circle me-2"></i>
                         <?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="/Ismano/public/profile/">
+                        <li><a class="dropdown-item" href="/Ismano/public/profile/admin/">
                             <i class="fas fa-user"></i> My Profile
                         </a></li>
-                        <li><a class="dropdown-item" href="#">
+                        <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2): ?>
+                        <li><a class="dropdown-item" href="/Ismano/public/admin/settings/index.php">
                             <i class="fas fa-cog"></i> Settings
                         </a></li>
+                        <?php endif; ?>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="/Ismano/public/auth/logout.php">
                             <i class="fas fa-sign-out-alt"></i> Logout
@@ -408,7 +597,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i>
                     <?php echo $_SESSION['flash']['success']; unset($_SESSION['flash']['success']); ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
             
@@ -416,7 +605,15 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i>
                     <?php echo $_SESSION['flash']['error']; unset($_SESSION['flash']['error']); ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (isset($_SESSION['flash']['warning'])): ?>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <?php echo $_SESSION['flash']['warning']; unset($_SESSION['flash']['warning']); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
             
@@ -425,34 +622,99 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role_id']) || $_SESSION['r
         </div>
     </div>
     
-    <!-- Mobile Menu Toggle -->
-    <button class="mobile-menu-toggle" id="mobileMenuToggle">
-        <i class="fas fa-bars"></i>
-    </button>
-    
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Mobile Menu Script -->
+    <!-- Mobile Sidebar Script -->
     <script>
-        const mobileToggle = document.getElementById('mobileMenuToggle');
-        const sidebar = document.querySelector('.admin-sidebar');
-        
-        if (mobileToggle && sidebar) {
-            mobileToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('active');
-            });
+        (function() {
+            'use strict';
             
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', function(event) {
-                const isMobile = window.innerWidth <= 768;
-                if (isMobile && sidebar.classList.contains('active')) {
-                    if (!sidebar.contains(event.target) && !mobileToggle.contains(event.target)) {
-                        sidebar.classList.remove('active');
-                    }
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            function openSidebar() {
+                if (sidebar) sidebar.classList.add('active');
+                if (overlay) overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                
+                // Save state
+                localStorage.setItem('adminSidebarOpen', 'true');
+            }
+            
+            function closeSidebar() {
+                if (sidebar) sidebar.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                
+                // Save state
+                localStorage.setItem('adminSidebarOpen', 'false');
+            }
+            
+            function toggleSidebar() {
+                if (sidebar && sidebar.classList.contains('active')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            }
+            
+            // Toggle button click
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', toggleSidebar);
+            }
+            
+            // Overlay click
+            if (overlay) {
+                overlay.addEventListener('click', closeSidebar);
+            }
+            
+            // Close on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar && sidebar.classList.contains('active')) {
+                    closeSidebar();
                 }
             });
-        }
+            
+            // Handle window resize - close sidebar when switching to desktop
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    if (window.innerWidth > 992 && sidebar && sidebar.classList.contains('active')) {
+                        closeSidebar();
+                    }
+                }, 250);
+            });
+            
+            // Close sidebar when clicking on a link (mobile only)
+            if (sidebar) {
+                const sidebarLinks = sidebar.querySelectorAll('.nav-link');
+                sidebarLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 992) {
+                            setTimeout(closeSidebar, 150);
+                        }
+                    });
+                });
+            }
+            
+            // Restore sidebar state on page load (desktop only)
+            if (window.innerWidth > 992) {
+                // On desktop, sidebar is always visible
+                if (sidebar) sidebar.classList.remove('active');
+            } else {
+                // On mobile, check saved state
+                const savedState = localStorage.getItem('adminSidebarOpen');
+                if (savedState === 'true' && sidebar) {
+                    setTimeout(function() {
+                        sidebar.classList.add('active');
+                        if (overlay) overlay.classList.add('active');
+                    }, 100);
+                }
+            }
+        })();
     </script>
     
     <?php if (isset($extra_js)): ?>

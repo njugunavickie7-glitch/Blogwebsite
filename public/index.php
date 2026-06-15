@@ -566,6 +566,99 @@ ob_start();
   .hp-testi-nav.prev{ left:4px; } .hp-testi-nav.next{ right:4px; }
   .hp-promo{ flex-direction:column; align-items:flex-start; text-align:left; }
 }
+
+/* Gallery Modal Styles - matching gallery page */
+.gp-modal .modal-dialog { max-width: 900px; }
+.gp-modal .modal-content {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--gp-dark, #06342F);
+    position: relative;
+}
+.gp-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 10;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    color: #fff;
+    font-size: .9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .2s ease;
+}
+.gp-modal-close:hover { background: rgba(255,255,255,.25); }
+.gp-modal-body {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+}
+.gp-modal-media {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+.gp-modal-media img { width: 100%; max-height: 600px; object-fit: contain; display: block; }
+.gp-modal-media iframe,
+.gp-modal-media video { width: 100%; min-height: 360px; display: block; border: none; }
+.gp-modal-info {
+    padding: 32px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--gp-dark, #06342F);
+    color: #fff;
+}
+.gp-modal-cat {
+    display: inline-block;
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--brand-secondary, #2DD4BF);
+    background: rgba(45,212,191,.12);
+    border: 1px solid rgba(45,212,191,.25);
+    border-radius: 6px;
+    padding: 4px 10px;
+    align-self: flex-start;
+}
+.gp-modal-title {
+    font-family: var(--font-display, 'Montserrat', sans-serif);
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.25;
+    margin: 0;
+}
+.gp-modal-desc {
+    font-size: .88rem;
+    color: rgba(255,255,255,.68);
+    line-height: 1.65;
+    margin: 0;
+    flex: 1;
+}
+.gp-modal-type {
+    font-size: .72rem;
+    font-weight: 600;
+    color: rgba(255,255,255,.4);
+    letter-spacing: .06em;
+    margin-top: auto;
+}
+.gp-modal-type i { margin-right: 5px; }
+
+@media (max-width: 768px) {
+    .gp-modal-body { grid-template-columns: 1fr; }
+    .gp-modal-info { padding: 20px 18px 26px; }
+    .gp-modal-media { min-height: 240px; }
+}
 </style>
 
 <main class="hp-main">
@@ -768,7 +861,54 @@ ob_start();
     </div>
   </section>
 
-  <!-- ============ GALLERY ============ -->
+  <!-- ============ GALLERY (DYNAMIC FROM DB) ============ -->
+  <?php
+  // Fetch gallery items from database
+  $galleryItems = [];
+  $galleryError = null;
+  
+  try {
+      if ($db_ready && isset($pdo)) {
+          // First check if gallery table exists
+          $tableCheck = $pdo->query("SHOW TABLES LIKE 'gallery'");
+          if ($tableCheck->rowCount() > 0) {
+              // Fetch active gallery items with images only (for homepage grid)
+              $stmt = $pdo->prepare("
+                  SELECT id, title, description, file_path, thumbnail_path, media_type, category 
+                  FROM gallery 
+                  WHERE status = 'active' 
+                  AND media_type = 'image'
+                  AND file_path IS NOT NULL 
+                  AND file_path != ''
+                  ORDER BY is_featured DESC, sort_order ASC, created_at DESC 
+                  LIMIT 8
+              ");
+              $stmt->execute();
+              $galleryItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+          }
+      }
+  } catch (Throwable $e) {
+      $galleryError = $e->getMessage();
+      error_log('[Homepage Gallery] ' . $e->getMessage());
+  }
+  
+  // Fallback images if no gallery items in DB
+  $fallbackGallery = [
+      'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=600&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=600&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&q=80&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=600&q=80&auto=format&fit=crop',
+  ];
+  
+  // Determine which items to display
+  $displayGallery = !empty($galleryItems) ? $galleryItems : $fallbackGallery;
+  $isFromDB = !empty($galleryItems);
+  ?>
+  
   <section class="hp-section hp-gallery" id="gallery">
     <div class="container">
       <div class="hp-gal-head reveal">
@@ -777,50 +917,157 @@ ob_start();
         <p class="hp-lead">A snapshot of our completed engineering projects across Kenya — from HVAC to commercial kitchens and beyond.</p>
       </div>
       <div class="hp-gal-grid reveal">
-        <?php foreach ($gallery as $i => $img):
-          $cls = ($i === 0) ? 'span2' : (($i === 4) ? 'tall' : ''); ?>
-          <a class="hp-gal-item <?php echo $cls; ?>" href="<?php echo $img; ?>" target="_blank" rel="noopener" aria-label="View project image">
-            <img src="<?php echo $img; ?>" alt="ISMAN project gallery image <?php echo $i + 1; ?>" loading="lazy" onerror="ismanImgFallback(this)">
+        <?php 
+        $totalItems = count($displayGallery);
+        foreach ($displayGallery as $i => $item):
+          // Determine class for grid sizing (first item wide, some tall for variety)
+          $cls = '';
+          if ($i === 0 && $totalItems >= 4) $cls = 'span2';
+          elseif ($i === 3 && $totalItems > 4) $cls = 'tall';
+          elseif ($i === 5 && $totalItems > 6) $cls = 'span2';
+          
+          // Get image URL
+          if ($isFromDB) {
+              $imgUrl = !empty($item['file_path']) ? $item['file_path'] : $fallbackGallery[$i % count($fallbackGallery)];
+              $imgAlt = htmlspecialchars($item['title'] ?? 'Project image');
+              $hasLink = !empty($item['id']);
+              $linkUrl = $hasLink ? '/Ismano/public/gallery/' : '#gallery';
+          } else {
+              $imgUrl = $item;
+              $imgAlt = 'ISMAN project gallery image ' . ($i + 1);
+              $hasLink = false;
+              $linkUrl = '#gallery';
+          }
+        ?>
+          <a class="hp-gal-item <?php echo $cls; ?>" 
+             href="<?php echo $imgUrl; ?>" 
+             <?php echo $hasLink ? 'data-bs-toggle="modal" data-bs-target="#galleryModal-' . ($i + 1) . '"' : 'target="_blank" rel="noopener"'; ?> 
+             aria-label="View project image">
+            <img src="<?php echo htmlspecialchars($imgUrl); ?>" 
+                 alt="<?php echo $imgAlt; ?>" 
+                 loading="lazy" 
+                 onerror="ismanImgFallback(this)">
           </a>
         <?php endforeach; ?>
       </div>
+      
+      <?php if (!empty($galleryItems) && count($galleryItems) > 8): ?>
+      <div class="text-center mt-5 reveal">
+        <a href="/Ismano/public/gallery/" class="btn btn--primary">
+          <i class="fa-regular fa-images"></i> View Full Gallery
+        </a>
+      </div>
+      <?php endif; ?>
     </div>
   </section>
-
-  <!-- ============ TESTIMONIALS ============ -->
-  <section class="hp-testi">
-    <div class="container">
-      <div class="hp-testi-head reveal">
-        <span class="hp-pill">Client Stories</span>
-        <h2>What Our Clients Say</h2>
-        <p>Direct feedback from the decision-makers we partner with every day.</p>
-      </div>
-      <div class="hp-testi-stage reveal">
-        <button class="hp-testi-nav prev" id="testiPrev" aria-label="Previous testimonial"><i class="fa-solid fa-chevron-left"></i></button>
-        <div id="testiTrack">
-          <?php foreach ($testimonials as $i => $t): ?>
-            <figure class="hp-testi-card <?php echo $i === 0 ? 'is-active' : ''; ?>" data-index="<?php echo $i; ?>">
-              <div class="hp-testi-quote-mark">&ldquo;</div>
-              <div class="hp-testi-stars" aria-label="5 out of 5 stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-              <blockquote class="hp-testi-text"><?php echo htmlspecialchars($t['quote']); ?></blockquote>
-              <figcaption class="hp-testi-author">
-                <span class="hp-testi-avatar"><?php echo htmlspecialchars($t['initial']); ?></span>
-                <span class="hp-testi-name"><?php echo htmlspecialchars($t['name']); ?></span>
-                <span class="hp-testi-role"><?php echo htmlspecialchars($t['role']); ?></span>
-                <span class="hp-testi-tag"><?php echo htmlspecialchars($t['tag']); ?></span>
-              </figcaption>
-            </figure>
-          <?php endforeach; ?>
+  
+  <?php if (!empty($galleryItems) && $isFromDB): ?>
+  <!-- Gallery Modals (for DB items only) -->
+  <?php foreach ($galleryItems as $i => $item): ?>
+  <div class="modal fade gp-modal" id="galleryModal-<?php echo $i + 1; ?>" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <button type="button" class="gp-modal-close" data-bs-dismiss="modal" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="gp-modal-body">
+          <div class="gp-modal-media">
+            <?php if ($item['media_type'] === 'video' && !empty($item['file_path'])): ?>
+              <video controls class="w-100">
+                <source src="<?php echo htmlspecialchars($item['file_path']); ?>" type="video/mp4">
+              </video>
+            <?php else: ?>
+              <img src="<?php echo htmlspecialchars($item['file_path']); ?>" 
+                   class="img-fluid" 
+                   alt="<?php echo htmlspecialchars($item['title']); ?>"
+                   onerror="this.onerror=null;this.src='https://placehold.co/1200x800?text=Image+Unavailable'">
+            <?php endif; ?>
+          </div>
+          <div class="gp-modal-info">
+            <?php if (!empty($item['category'])): ?>
+              <span class="gp-modal-cat"><?php echo htmlspecialchars($item['category']); ?></span>
+            <?php endif; ?>
+            <h2 class="gp-modal-title"><?php echo htmlspecialchars($item['title']); ?></h2>
+            <?php if (!empty($item['description'])): ?>
+              <p class="gp-modal-desc"><?php echo nl2br(htmlspecialchars($item['description'])); ?></p>
+            <?php endif; ?>
+            <span class="gp-modal-type">
+              <i class="fas fa-<?php echo $item['media_type'] === 'video' ? 'video' : 'image'; ?>"></i> 
+              <?php echo ucfirst($item['media_type'] ?? 'image'); ?>
+            </span>
+          </div>
         </div>
-        <button class="hp-testi-nav next" id="testiNext" aria-label="Next testimonial"><i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-      <div class="hp-testi-dots" id="testiDots">
-        <?php foreach ($testimonials as $i => $t): ?>
-          <button class="hp-testi-dot <?php echo $i === 0 ? 'is-active' : ''; ?>" data-dot="<?php echo $i; ?>" aria-label="Go to testimonial <?php echo $i + 1; ?>"></button>
-        <?php endforeach; ?>
       </div>
     </div>
-  </section>
+  </div>
+  <?php endforeach; ?>
+  <?php endif; ?>
+
+<!-- ============ TESTIMONIALS (DYNAMIC FROM DB) ============ -->
+<?php
+// Fetch approved testimonials for homepage
+$homeTestimonials = [];
+try {
+    if ($db_ready && isset($pdo)) {
+        $stmt = $pdo->prepare("
+            SELECT * FROM testimonials 
+            WHERE status = 'approved' 
+            ORDER BY is_featured DESC, sort_order ASC, created_at DESC 
+            LIMIT 6
+        ");
+        $stmt->execute();
+        $homeTestimonials = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+} catch (Throwable $e) {
+    error_log('Homepage testimonials error: ' . $e->getMessage());
+}
+
+// Fallback if no testimonials in DB
+if (empty($homeTestimonials)) {
+    $homeTestimonials = [
+        ['customer_name' => 'James Mwangi', 'customer_initial' => 'J', 'rating' => 5, 'testimonial_text' => 'ISMAN designed and installed our 450 sqm hotel kitchen in under 8 weeks...', 'service_tag' => 'Commercial Kitchen', 'role' => 'General Manager, Radisson Blu Nairobi'],
+        ['customer_name' => 'Aisha Noor', 'customer_initial' => 'A', 'rating' => 5, 'testimonial_text' => 'The stainless balustrade work at Two Rivers was flawless...', 'service_tag' => 'Stainless Railing', 'role' => 'Project Lead, Centum Investment'],
+    ];
+}
+?>
+
+<section class="hp-testi">
+    <div class="container">
+        <div class="hp-testi-head reveal">
+            <span class="hp-pill">Client Stories</span>
+            <h2>What Our Clients Say</h2>
+            <p>Direct feedback from the decision-makers we partner with every day.</p>
+        </div>
+        <div class="hp-testi-stage reveal">
+            <button class="hp-testi-nav prev" id="testiPrev" aria-label="Previous testimonial"><i class="fa-solid fa-chevron-left"></i></button>
+            <div id="testiTrack">
+                <?php foreach ($homeTestimonials as $i => $t): ?>
+                    <figure class="hp-testi-card <?php echo $i === 0 ? 'is-active' : ''; ?>" data-index="<?php echo $i; ?>">
+                        <div class="hp-testi-quote-mark">&ldquo;</div>
+                        <div class="hp-testi-stars" aria-label="5 out of 5 stars">
+                            <?php for ($s = 1; $s <= 5; $s++): ?>
+                                <i class="fa-solid fa-star"></i>
+                            <?php endfor; ?>
+                        </div>
+                        <blockquote class="hp-testi-text"><?php echo htmlspecialchars($t['testimonial_text']); ?></blockquote>
+                        <figcaption class="hp-testi-author">
+                            <span class="hp-testi-avatar"><?php echo htmlspecialchars($t['customer_initial'] ?? substr($t['customer_name'], 0, 1)); ?></span>
+                            <span class="hp-testi-name"><?php echo htmlspecialchars($t['customer_name']); ?></span>
+                            <span class="hp-testi-role"><?php echo htmlspecialchars($t['role'] ?? ''); ?></span>
+                            <span class="hp-testi-tag"><?php echo htmlspecialchars($t['service_tag'] ?? ''); ?></span>
+                        </figcaption>
+                    </figure>
+                <?php endforeach; ?>
+            </div>
+            <button class="hp-testi-nav next" id="testiNext" aria-label="Next testimonial"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="hp-testi-dots" id="testiDots">
+            <?php foreach ($homeTestimonials as $i => $t): ?>
+                <button class="hp-testi-dot <?php echo $i === 0 ? 'is-active' : ''; ?>" data-dot="<?php echo $i; ?>" aria-label="Go to testimonial <?php echo $i + 1; ?>"></button>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
 
   <?php if (!empty($blogs)): ?>
   <!-- ============ LATEST BLOGS ============ -->
@@ -896,39 +1143,41 @@ ob_start();
 
         <div class="hp-form-card reveal reveal-delay-2">
           <h3>Book / Enquire Now</h3>
-          <!-- NOTE: front-end stub. Wire action to your PHP handler (e.g. /Ismano/public/contact/submit.php) to persist enquiries. -->
-          <form id="enquiryForm" novalidate>
-            <div class="hp-form-row">
-              <div class="hp-field">
-                <label for="ef-name">Full Name</label>
-                <input type="text" id="ef-name" name="name" placeholder="John Kamau" required>
-              </div>
-              <div class="hp-field">
-                <label for="ef-phone">Phone</label>
-                <input type="tel" id="ef-phone" name="phone" placeholder="072 411 XXXX" required>
-              </div>
-            </div>
-            <div class="hp-field">
-              <label for="ef-email">Email</label>
-              <input type="email" id="ef-email" name="email" placeholder="you@example.com" required>
-            </div>
-            <div class="hp-field">
-              <label for="ef-service">Service Required</label>
-              <select id="ef-service" name="service" required>
-                <option value="" selected disabled>Select a service</option>
-                <?php foreach ($serviceOptions as $opt): ?>
-                  <option value="<?php echo htmlspecialchars($opt); ?>"><?php echo htmlspecialchars($opt); ?></option>
-                <?php endforeach; ?>
-                <option value="Other">Other / Not sure</option>
-              </select>
-            </div>
-            <div class="hp-field">
-              <label for="ef-message">Message <span style="text-transform:none;letter-spacing:0;font-weight:400;">(max 500 chars)</span></label>
-              <textarea id="ef-message" name="message" maxlength="500" placeholder="Tell us about your project…"></textarea>
-            </div>
-            <button type="submit" class="btn btn--primary hp-form-submit"><i class="fa-solid fa-paper-plane"></i> Send Enquiry</button>
-            <p class="hp-form-msg" id="enquiryMsg" role="status">Thanks — your enquiry has been captured. Connect this form to your backend to start receiving leads.</p>
-          </form>
+<form id="enquiryForm" novalidate>
+    <div class="hp-form-row">
+        <div class="hp-field">
+            <label for="ef-name">Full Name *</label>
+            <input type="text" id="ef-name" name="name" placeholder="John Kamau" required>
+        </div>
+        <div class="hp-field">
+            <label for="ef-phone">Phone *</label>
+            <input type="tel" id="ef-phone" name="phone" placeholder="072 411 XXXX" required>
+        </div>
+    </div>
+    <div class="hp-field">
+        <label for="ef-email">Email *</label>
+        <input type="email" id="ef-email" name="email" placeholder="you@example.com" required>
+    </div>
+    <div class="hp-field">
+        <label for="ef-service">Service Required</label>
+        <select id="ef-service" name="service">
+            <option value="" selected disabled>Select a service</option>
+            <?php foreach ($serviceOptions as $opt): ?>
+                <option value="<?php echo htmlspecialchars($opt); ?>"><?php echo htmlspecialchars($opt); ?></option>
+            <?php endforeach; ?>
+            <option value="Other">Other / Not sure</option>
+        </select>
+    </div>
+    <div class="hp-field">
+        <label for="ef-message">Message * <span style="text-transform:none;letter-spacing:0;font-weight:400;">(max 500 chars)</span></label>
+        <textarea id="ef-message" name="message" maxlength="500" placeholder="Tell us about your project…" required></textarea>
+    </div>
+    <button type="submit" class="btn btn--primary hp-form-submit" id="submitBtn">
+        <i class="fa-solid fa-paper-plane"></i> Send Enquiry
+    </button>
+    <div id="enquiryMsg" class="hp-form-msg" style="display:none;"></div>
+</form>
+
         </div>
       </div>
     </div>
@@ -1053,17 +1302,92 @@ ob_start();
     tStart();
   }
 
-  /* Enquiry form (front-end stub) */
-  var form = document.getElementById('enquiryForm');
-  var msg  = document.getElementById('enquiryMsg');
-  if (form) {
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (!form.checkValidity()) { form.reportValidity(); return; }
-      if (msg) msg.classList.add('is-shown');
-      form.reset();
+// Enquiry form submission - Updated version
+const enquiryForm = document.getElementById('enquiryForm');
+if (enquiryForm) {
+    enquiryForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Validate form
+        if (!enquiryForm.checkValidity()) {
+            enquiryForm.reportValidity();
+            return;
+        }
+        
+        const submitBtn = enquiryForm.querySelector('button[type="submit"]');
+        const originalHtml = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        submitBtn.disabled = true;
+        
+        // Get form data
+        const formData = {
+            name: document.getElementById('ef-name')?.value || '',
+            phone: document.getElementById('ef-phone')?.value || '',
+            email: document.getElementById('ef-email')?.value || '',
+            service: document.getElementById('ef-service')?.value || '',
+            message: document.getElementById('ef-message')?.value || ''
+        };
+        
+        try {
+            const response = await fetch('/Ismano/public/api/submit-enquiry.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const data = await response.json();
+            const msgDiv = document.getElementById('enquiryMsg');
+            
+            if (!msgDiv) {
+                // Create message div if it doesn't exist
+                const newMsgDiv = document.createElement('div');
+                newMsgDiv.id = 'enquiryMsg';
+                newMsgDiv.className = 'hp-form-msg';
+                newMsgDiv.style.cssText = 'margin-top: 15px; padding: 12px; border-radius: 8px; font-size: 14px;';
+                enquiryForm.appendChild(newMsgDiv);
+            }
+            
+            const messageDiv = document.getElementById('enquiryMsg');
+            messageDiv.style.display = 'block';
+            
+            if (data.success) {
+                messageDiv.style.background = '#d4edda';
+                messageDiv.style.color = '#155724';
+                messageDiv.style.border = '1px solid #c3e6cb';
+                messageDiv.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
+                enquiryForm.reset();
+                
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            } else {
+                messageDiv.style.background = '#f8d7da';
+                messageDiv.style.color = '#721c24';
+                messageDiv.style.border = '1px solid #f5c6cb';
+                messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.message;
+            }
+        } catch (error) {
+            console.error('Form submission error:', error);
+            const messageDiv = document.getElementById('enquiryMsg');
+            if (messageDiv) {
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#f8d7da';
+                messageDiv.style.color = '#721c24';
+                messageDiv.style.border = '1px solid #f5c6cb';
+                messageDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Unable to send message. Please try again or call us directly.';
+            } else {
+                alert('Unable to send message. Please call us directly at <?php echo $brand['phone']; ?>');
+            }
+        } finally {
+            submitBtn.innerHTML = originalHtml;
+            submitBtn.disabled = false;
+        }
     });
-  }
+}
+
 })();
 </script>
 

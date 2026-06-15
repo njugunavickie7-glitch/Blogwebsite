@@ -318,4 +318,23 @@ class OrderModel {
         foreach ($orders as &$o) { $o['items'] = $this->getItems((int) $o['id']); }
         return $orders;
     }
+
+    /** Count of paid orders with at least one parcel still needing fulfillment. */
+    public function countNeedingAttention(): int {
+        $sql = "SELECT COUNT(DISTINCT o.id)
+                FROM store_orders o
+                JOIN store_order_items i ON i.order_id = o.id
+                WHERE o.payment_status = 'paid'
+                  AND i.fulfillment_status NOT IN ('picked_up', 'arrived', 'cancelled')";
+        return (int) $this->db->query($sql)->fetchColumn();
+    }
+
+    /** Newest paid order (used to detect "a new order just arrived"). */
+    public function latestPaidOrder(): ?array {
+        $stmt = $this->db->query(
+            "SELECT id, order_number, customer_name, total, created_at
+             FROM store_orders WHERE payment_status = 'paid' ORDER BY id DESC LIMIT 1"
+        );
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
 }

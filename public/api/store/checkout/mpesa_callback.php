@@ -34,8 +34,18 @@ try {
                 'payer_name' => null, // Daraja STK callback doesn't return the payer name
             ]);
 
-            // TODO (next): on $res['ok'] && empty($res['already']) send the
-            // purchase-success email + generate the receipt for $res['order'].
+            // Send the purchase-confirmation email once (not on duplicate callbacks).
+            if (!empty($res['ok']) && empty($res['already'])) {
+                try {
+                    require_once __DIR__ . '/../../../../app/services/OrderNotifier.php';
+                    $mailCfg = require __DIR__ . '/../../../../app/config/mail.php';
+                    $notifier = new OrderNotifier($pdo, new Mailer($mailCfg));
+                    $full = $orders->getOrderWithItems((int) $res['order']['id']);
+                    if ($full) $notifier->sendPurchaseConfirmation($full);
+                } catch (Throwable $e) {
+                    error_log('[mpesa callback] email error: ' . $e->getMessage());
+                }
+            }
         } else {
             // Customer cancelled, insufficient funds, timeout, etc.
             $orders->markFailedByCheckoutId($cb['checkout_request_id']);

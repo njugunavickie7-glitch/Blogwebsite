@@ -90,7 +90,9 @@ class CheckoutController {
         } catch (Throwable $e) {
             $this->orders->markFailedById((int) $order['id']);
             error_log('[checkout] STK push error: ' . $e->getMessage());
-            return $this->err('Could not reach M-Pesa right now. Please try again.');
+            // NOTE: the real message is shown to help you debug. Once live, replace
+            // with a generic 'Could not reach M-Pesa right now. Please try again.'
+            return $this->err('M-Pesa error: ' . $e->getMessage());
         }
 
         if (($resp['ResponseCode'] ?? '1') !== '0') {

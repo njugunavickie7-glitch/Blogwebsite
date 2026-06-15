@@ -132,6 +132,17 @@ class MpesaService {
             CURLOPT_TIMEOUT        => 30,
             CURLOPT_CUSTOMREQUEST  => $method,
         ]);
+
+        // SSL handling. On Windows/Ampps, cURL often lacks a CA bundle and fails
+        // with "SSL certificate problem". Point cacert_path at a cacert.pem to fix
+        // it properly; only set verify_ssl=false as a last resort on local dev.
+        $verify = $this->cfg['verify_ssl'] ?? true;
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $verify);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $verify ? 2 : 0);
+        if (!empty($this->cfg['cacert_path']) && is_file($this->cfg['cacert_path'])) {
+            curl_setopt($ch, CURLOPT_CAINFO, $this->cfg['cacert_path']);
+        }
+
         if ($body !== null) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
         }

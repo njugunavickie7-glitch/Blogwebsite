@@ -1,8 +1,8 @@
 {
-    "autoload": {
-        "psr-4": {
-            "Controllers\\": "app/controllers/",
-            "Models\\": "app/models/"
-        }
+    "name": "isman/ismano",
+    "description": "ISMAN Company web application",
+    "require": {
+        "php": ">=7.4",
+        "phpmailer/phpmailer": "^6.9"
     }
 }
