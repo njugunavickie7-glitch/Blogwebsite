@@ -5,12 +5,12 @@ require_once __DIR__ . '/../../../app/helpers/functions.php';
 require_once __DIR__ . '/../../../app/controllers/ProjectController.php';
 
 if (!isLoggedIn()) {
-    redirect('/Ismano/public/admin/portal.php');
+    redirect('/Realestate/public/admin/portal.php');
 }
 
 $role_id = $_SESSION['role_id'] ?? 3;
 if ($role_id > 2) {
-    redirect('/Ismano/public/auth/login.php');
+    redirect('/Realestate/public/auth/login.php');
 }
 
 $controller = new ProjectController($pdo);
@@ -104,7 +104,7 @@ $categories = $controller->getCategories();
 
 $page_title = $project['small_title'] . ' - Edit Project';
 $breadcrumbs = [
-    ['label' => 'Dashboard', 'url' => '/Ismano/public/admin/dashboard.php'],
+    ['label' => 'Dashboard', 'url' => '/Realestate/public/admin/dashboard.php'],
     ['label' => 'Projects', 'url' => 'index.php'],
     ['label' => $project['small_title'], 'active' => true]
 ];
@@ -336,7 +336,7 @@ ob_start();
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-body">
-                                <form action="/Ismano/public/api/projects.php?action=upload_gallery" method="POST" class="dropzone" id="galleryDropzone">
+                                <form action="/Realestate/public/api/projects.php?action=upload_gallery" method="POST" class="dropzone" id="galleryDropzone">
                                     <input type="hidden" name="project_id" value="<?php echo $project_id; ?>">
                                     <div class="dz-message">
                                         <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: #667eea;"></i>
@@ -436,7 +436,7 @@ ob_start();
 Dropzone.autoDiscover = false;
 
 var galleryDropzone = new Dropzone("#galleryDropzone", {
-    url: "/Ismano/public/api/projects.php?action=upload_gallery",
+    url: "/Realestate/public/api/projects.php?action=upload_gallery",
     params: {
         project_id: <?php echo $project_id; ?>
     },

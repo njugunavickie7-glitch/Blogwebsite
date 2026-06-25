@@ -8,12 +8,12 @@ $username = $_SESSION['username'] ?? '';
 $role = $_SESSION['role'] ?? '';
 
 // Where the cart icon links to. Change this if your cart page lives elsewhere.
-$cartUrl = '/Ismano/public/store/cart.php';
+$cartUrl = '/Realestate/public/store/cart.php';
 ?>
 <nav class="navbar navbar-expand-lg navbar-modern fixed-top">
     <div class="container">
-        <a class="navbar-brand" href="/Ismano/public/">
-            <i class="fas fa-shield-alt me-2"></i>Ismano
+        <a class="navbar-brand" href="/Realestate/public/">
+            <i class="fas fa-shield-alt me-2"></i>Realestate
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -21,7 +21,7 @@ $cartUrl = '/Ismano/public/store/cart.php';
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-lg-center">
                 <li class="nav-item">
-                    <a class="nav-link" href="/Ismano/public/">
+                    <a class="nav-link" href="/Realestate/public/">
                         <i class="fas fa-home"></i> Home
                     </a>
                 </li>
@@ -39,13 +39,13 @@ $cartUrl = '/Ismano/public/store/cart.php';
 
                 <?php if ($isLoggedIn): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="/Ismano/public/profile/">
+                        <a class="nav-link" href="/Realestate/public/profile/">
                             <i class="fas fa-user-circle"></i> Profile
                         </a>
                     </li>
                     <?php if ($role === 'admin' || $role === 'superadmin'): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="/Ismano/public/admin/dashboard.php">
+                        <a class="nav-link" href="/Realestate/public/admin/dashboard.php">
                             <i class="fas fa-tachometer-alt"></i> Dashboard
                         </a>
                     </li>
@@ -55,26 +55,26 @@ $cartUrl = '/Ismano/public/store/cart.php';
                             <i class="fas fa-user"></i> <?php echo htmlspecialchars($username); ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/Ismano/public/profile/">
+                            <li><a class="dropdown-item" href="/Realestate/public/profile/">
                                 <i class="fas fa-id-card"></i> My Profile
                             </a></li>
-                            <li><a class="dropdown-item" href="/Ismano/public/profile/#settings">
+                            <li><a class="dropdown-item" href="/Realestate/public/profile/#settings">
                                 <i class="fas fa-cog"></i> Settings
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="/Ismano/public/auth/logout.php">
+                            <li><a class="dropdown-item text-danger" href="/Realestate/public/auth/logout.php">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a></li>
                         </ul>
                     </li>
                 <?php else: ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="/Ismano/public/auth/login.php">
+                        <a class="nav-link" href="/Realestate/public/auth/login.php">
                             <i class="fas fa-sign-in-alt"></i> Login
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-primary-modern text-white px-4 ms-2" href="/Ismano/public/auth/register.php">
+                        <a class="nav-link btn btn-primary-modern text-white px-4 ms-2" href="/Realestate/public/auth/register.php">
                             <i class="fas fa-user-plus"></i> Sign Up
                         </a>
                     </li>
@@ -136,7 +136,7 @@ $cartUrl = '/Ismano/public/store/cart.php';
     }
 
     function refreshCart() {
-        fetch('/Ismano/public/api/count.php', { headers: { 'Accept': 'application/json' } })
+        fetch('/Realestate/public/api/count.php', { headers: { 'Accept': 'application/json' } })
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (data && data.success) applyCount(data.count);

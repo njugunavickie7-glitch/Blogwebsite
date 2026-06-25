@@ -20,8 +20,8 @@ function redirect($url) {
 
 function getRoleBasedProfileUrl() {
     if (isAdmin()) {
-        return '/Ismano/public/profile/admin/index.php';
+        return '/Realestate/public/profile/admin/index.php';
     }
-    return '/Ismano/public/profile/client/index.php';
+    return '/Realestate/public/profile/client/index.php';
 }
 ?>

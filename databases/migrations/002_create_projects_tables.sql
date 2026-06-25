@@ -1,6 +1,6 @@
--- Active: 1780050571987@@127.0.0.1@3306@ismano_db
+-- Active: 1780050571987@@127.0.0.1@3306@realestate_db
 -- databases/migrations/002_create_projects_tables.sql
-USE ismano_db;
+USE realestate_db;
 
 -- Create project categories table
 CREATE TABLE IF NOT EXISTS project_categories (

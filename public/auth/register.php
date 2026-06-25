@@ -10,7 +10,7 @@ $success = '';
 
 // Redirect if already logged in
 if (isLoggedIn()) {
-    redirect('/Ismano/public/profile/');
+    redirect('/Realestate/public/profile/');
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -63,7 +63,7 @@ function old(string $key): string {
 }
 
 // Logo (mirrors the navbar's logic — PNG if present, else inline mark)
-$logoPath = '/Ismano/public/assets/images/logo/logo.png';
+$logoPath = '/Realestate/public/assets/images/logo/logo.png';
 $logoExists = isset($_SERVER['DOCUMENT_ROOT']) && is_file($_SERVER['DOCUMENT_ROOT'] . $logoPath);
 ?>
 <!DOCTYPE html>
@@ -87,7 +87,7 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT']) && is_file($_SERVER['DOCUMENT_ROO
         <img class="auth-brand-bgimg"
              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1400&q=80" alt="" aria-hidden="true">
         <div class="auth-brand-inner">
-            <a class="auth-logo" href="/Ismano/public/" aria-label="Ismano — Home">
+            <a class="auth-logo" href="/Realestate/public/" aria-label="Ismano — Home">
                 <?php if ($logoExists): ?>
                     <img src="<?php echo $logoPath; ?>" alt="Ismano logo" class="brand-logo">
                 <?php else: ?>
@@ -110,13 +110,13 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT']) && is_file($_SERVER['DOCUMENT_ROO
                 <li><i class="fas fa-check"></i> Free to join — no commitment</li>
             </ul>
         </div>
-        <p class="auth-brand-foot">&copy; <?php echo date('Y'); ?> Ismano. All rights reserved.</p>
+        <p class="auth-brand-foot">&copy; <?php echo date('Y'); ?> Prime Investment. All rights reserved.</p>
     </aside>
 
     <!-- Form panel -->
     <main class="auth-form">
         <div class="auth-form-top">
-            <a href="/Ismano/public/" class="auth-back"><i class="fas fa-arrow-left"></i> Back to home</a>
+            <a href="/Realestate/public/" class="auth-back"><i class="fas fa-arrow-left"></i> Back to home</a>
         </div>
 
         <div class="auth-form-body">

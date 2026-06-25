@@ -1,7 +1,7 @@
--- Active: 1780050571987@@127.0.0.1@3306@ismano_db
+-- Active: 1780050571987@@127.0.0.1@3306@realestate_db
 -- databases/migrations/001_create_users_table.sql
-CREATE DATABASE IF NOT EXISTS ismano_db;
-USE ismano_db;
+CREATE DATABASE IF NOT EXISTS realestate_db;
+USE realestate_db;
 
 -- Create roles table
 CREATE TABLE IF NOT EXISTS roles (
@@ -55,5 +55,5 @@ CREATE TABLE IF NOT EXISTS login_attempts (
 
 -- Insert a default super admin (password: Admin123!)
 INSERT INTO users (username, email, password_hash, role_id, is_active, email_verified) 
-VALUES ('superadmin', 'admin@ismano.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 1, 1)
+VALUES ('Administrator', 'admin@gmail.com', '$2y$10$Gwm4NsOLyUch9BclS6eDfeod2AUT1vFDwhellc.tLmRbRi9e.QGdi', 1, 1, 1)
 ON DUPLICATE KEY UPDATE username = username;

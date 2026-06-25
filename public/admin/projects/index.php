@@ -6,12 +6,12 @@ require_once __DIR__ . '/../../../app/controllers/ProjectController.php';
 
 // Check if logged in and is admin
 if (!isLoggedIn()) {
-    redirect('/Ismano/public/admin/portal.php');
+    redirect('/Realestate/public/admin/portal.php');
 }
 
 $role_id = $_SESSION['role_id'] ?? 3;
 if ($role_id > 2) {
-    redirect('/Ismano/public/auth/login.php');
+    redirect('/Realestate/public/auth/login.php');
 }
 
 $controller = new ProjectController($pdo);
@@ -92,7 +92,7 @@ $projects = $controller->getProjects();
 // Page variables
 $page_title = 'Projects Management';
 $breadcrumbs = [
-    ['label' => 'Dashboard', 'url' => '/Ismano/public/admin/dashboard.php'],
+    ['label' => 'Dashboard', 'url' => '/Realestate/public/admin/dashboard.php'],
     ['label' => 'Projects', 'active' => true]
 ];
 

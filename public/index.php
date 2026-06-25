@@ -931,7 +931,7 @@ ob_start();
               $imgUrl = !empty($item['file_path']) ? $item['file_path'] : $fallbackGallery[$i % count($fallbackGallery)];
               $imgAlt = htmlspecialchars($item['title'] ?? 'Project image');
               $hasLink = !empty($item['id']);
-              $linkUrl = $hasLink ? '/Ismano/public/gallery/' : '#gallery';
+              $linkUrl = $hasLink ? '/Realestate/public/gallery/' : '#gallery';
           } else {
               $imgUrl = $item;
               $imgAlt = 'ISMAN project gallery image ' . ($i + 1);
@@ -953,7 +953,7 @@ ob_start();
       
       <?php if (!empty($galleryItems) && count($galleryItems) > 8): ?>
       <div class="text-center mt-5 reveal">
-        <a href="/Ismano/public/gallery/" class="btn btn--primary">
+        <a href="/Realestate/public/gallery/" class="btn btn--primary">
           <i class="fa-regular fa-images"></i> View Full Gallery
         </a>
       </div>
@@ -1329,7 +1329,7 @@ if (enquiryForm) {
         };
         
         try {
-            const response = await fetch('/Ismano/public/api/submit-enquiry.php', {
+            const response = await fetch('/Realestate/public/api/submit-enquiry.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

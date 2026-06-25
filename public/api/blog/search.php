@@ -5,7 +5,7 @@ ini_set('display_errors', 0);
 header('Content-Type: application/json');
 
 try {
-    require_once __DIR__ . '/../../../app/config/db_connect.php');
+    require_once __DIR__ . '/../../../app/config/db_connect.php';
     require_once __DIR__ . '/../../../app/controllers/BlogController.php';
     
     $keyword = $_GET['q'] ?? $_GET['keyword'] ?? null;

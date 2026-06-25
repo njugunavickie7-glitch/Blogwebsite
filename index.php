@@ -1,3 +1,3 @@
 <?php
-header("Location: /Ismano/public/");
+header("Location: /Realestate/public/");
 exit();

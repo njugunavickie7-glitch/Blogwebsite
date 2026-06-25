@@ -122,7 +122,7 @@ function updateSortOrder(input) {
     const id = input.dataset.id;
     const sortOrder = input.value;
     
-    fetch('/Ismano/public/api/gallery/update_sort.php', {
+    fetch('/Realestate/public/api/gallery/update_sort.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: id, sort_order: sortOrder })

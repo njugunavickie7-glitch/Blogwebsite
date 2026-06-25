@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../../app/models/OrderModel.php';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (empty($_SESSION['user_id'])) {
-    header('Location: /Ismano/public/auth/login.php?redirect=' . urlencode('/Ismano/public/client/orders/'));
+    header('Location: /Realestate/public/auth/login.php?redirect=' . urlencode('/Realestate/public/client/orders/'));
     exit();
 }
 
@@ -62,7 +62,7 @@ function render_order($o, $isHistory = false) {
             <?php endforeach; ?>
             <?php if (!$isHistory && ($o['payment_status'] ?? '') === 'paid'): ?>
                 <div class="text-end mt-3">
-                    <a href="/Ismano/public/store/receipt.php?order=<?php echo urlencode($o['order_number']); ?>" class="btn btn-sm btn-outline-secondary">
+                    <a href="/Realestate/public/store/receipt.php?order=<?php echo urlencode($o['order_number']); ?>" class="btn btn-sm btn-outline-secondary">
                         <i class="fas fa-file-invoice me-1"></i> Receipt
                     </a>
                 </div>
@@ -77,7 +77,7 @@ ob_start();
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="mb-0">My Orders</h3>
-    <a href="/Ismano/public/store/" class="btn btn-sm btn-primary"><i class="fas fa-store me-1"></i> Shop more</a>
+    <a href="/Realestate/public/store/" class="btn btn-sm btn-primary"><i class="fas fa-store me-1"></i> Shop more</a>
 </div>
 
 <?php if (!empty($_GET['new'])): ?>

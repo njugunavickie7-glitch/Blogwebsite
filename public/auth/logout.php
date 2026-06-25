@@ -14,6 +14,6 @@ if (isset($_COOKIE[session_name()])) {
 session_destroy();
 
 // Redirect to login page
-header('Location: /Ismano/public/auth/login.php');
+header('Location: /Realestate/public/auth/login.php');
 exit();
 ?>

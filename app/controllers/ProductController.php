@@ -18,7 +18,7 @@ class ProductController {
         
         $featured_image_path = null;
         if ($featured_image && $featured_image['error'] === 0) {
-            $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/Ismano/public/uploads/products/';
+            $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/Realestate/public/uploads/products/';
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
             }
@@ -28,7 +28,7 @@ class ProductController {
             $target_file = $upload_dir . $filename;
             
             if (move_uploaded_file($featured_image['tmp_name'], $target_file)) {
-                $featured_image_path = '/Ismano/public/uploads/products/' . $filename;
+                $featured_image_path = '/Realestate/public/uploads/products/' . $filename;
             }
         }
         
@@ -92,13 +92,13 @@ class ProductController {
         if (isset($data['meta_keywords'])) $updateData['meta_keywords'] = $data['meta_keywords'];
         
         if ($featured_image && $featured_image['error'] === 0) {
-            $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/Ismano/public/uploads/products/';
+            $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/Realestate/public/uploads/products/';
             $ext = pathinfo($featured_image['name'], PATHINFO_EXTENSION);
             $filename = time() . '_' . uniqid() . '.' . $ext;
             $target_file = $upload_dir . $filename;
             
             if (move_uploaded_file($featured_image['tmp_name'], $target_file)) {
-                $updateData['featured_image'] = '/Ismano/public/uploads/products/' . $filename;
+                $updateData['featured_image'] = '/Realestate/public/uploads/products/' . $filename;
             }
         }
         

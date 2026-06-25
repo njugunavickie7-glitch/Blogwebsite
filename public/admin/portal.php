@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../app/helpers/functions.php';
 
 // If already logged in as admin, redirect to admin profile
 if (isLoggedIn() && isAdmin()) {
-    redirect('/Ismano/public/profile/admin/index.php');
+    redirect('/Realestate/public/profile/admin/index.php');
 }
 
 $error = '';
@@ -37,13 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['role_id'] = $user['role_id'];
             $_SESSION['logged_in'] = true;
 
-            redirect('/Ismano/public/profile/admin/index.php');
+            redirect('/Realestate/public/profile/admin/index.php');
         }
     }
 }
 
 // Logo (mirrors the navbar's logic — PNG if present, else inline mark)
-$logoPath = '/Ismano/public/assets/images/logo/logo.png';
+$logoPath = '/Realestate/public/assets/images/logo/logo.png';
 $logoExists = isset($_SERVER['DOCUMENT_ROOT']) && is_file($_SERVER['DOCUMENT_ROOT'] . $logoPath);
 ?>
 <!DOCTYPE html>
@@ -51,7 +51,7 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT']) && is_file($_SERVER['DOCUMENT_ROO
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Portal — Ismano</title>
+    <title>Admin Portal — Prime Estate</title>
 
     <link rel="stylesheet" href="../assets/css/theme.css">
     <link rel="stylesheet" href="../assets/css/auth.css">
@@ -70,7 +70,7 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT']) && is_file($_SERVER['DOCUMENT_ROO
     <!-- Brand panel (admin variant) -->
     <aside class="auth-brand is-admin">
         <div class="auth-brand-inner">
-            <a class="auth-logo" href="/Ismano/public/" aria-label="Ismano — Home">
+            <a class="auth-logo" href="/Realestate/public/" aria-label="Ismano — Home">
                 <?php if ($logoExists): ?>
                     <img src="<?php echo $logoPath; ?>" alt="Ismano logo" class="brand-logo">
                 <?php else: ?>
@@ -99,7 +99,7 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT']) && is_file($_SERVER['DOCUMENT_ROO
     <!-- Form panel -->
     <main class="auth-form">
         <div class="auth-form-top">
-            <a href="/Ismano/public/" class="auth-back"><i class="fas fa-arrow-left"></i> Back to home</a>
+            <a href="/Realestate/public/" class="auth-back"><i class="fas fa-arrow-left"></i> Back to home</a>
         </div>
 
         <div class="auth-form-body">
@@ -141,7 +141,7 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT']) && is_file($_SERVER['DOCUMENT_ROO
             <hr class="auth-divider">
 
             <p class="auth-portal">
-                <a href="/Ismano/public/auth/login.php"><i class="fas fa-arrow-left me-1"></i> Back to user login</a>
+                <a href="/Realestate/public/auth/login.php"><i class="fas fa-arrow-left me-1"></i> Back to user login</a>
             </p>
         </div>
     </main>

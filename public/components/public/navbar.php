@@ -32,7 +32,7 @@ $ismanEmail = 'info@isman.co.ke';
 $ismanLoc   = 'Nairobi, Kenya';
 
 // Logo path (falls back to an inline gear mark if the file is missing).
-$logoPath = '/Ismano/public/assets/images/logo/logo.png';
+$logoPath = '/Realestate/public/assets/images/logo/logo.png';
 $logoExists = isset($_SERVER['DOCUMENT_ROOT'])
     && is_file($_SERVER['DOCUMENT_ROOT'] . $logoPath);
 ?>
@@ -58,7 +58,7 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT'])
     <div class="header-inner container">
 
         <!-- Brand -->
-        <a class="header-brand" href="/Ismano/public/" aria-label="ISMAN Company — Home">
+        <a class="header-brand" href="/Realestate/public/" aria-label="Realestate — Home">
             <span class="brand-mark" aria-hidden="true">
                 <?php if ($logoExists): ?>
                     <img src="<?php echo $logoPath; ?>" alt="" width="44" height="44">
@@ -74,7 +74,7 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT'])
                 <?php endif; ?>
             </span>
             <span class="brand-text">
-                <span class="brand-name">ISMAN COMPANY</span>
+                <span class="brand-name">REALESTATE COMPANY</span>
                 <span class="brand-tag">Engineering Services</span>
             </span>
         </a>
@@ -82,30 +82,30 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT'])
         <!-- Desktop nav -->
         <nav class="header-nav" aria-label="Primary navigation">
             <ul class="nav-list" role="list">
-                <li><a class="nav-link <?php echo navIsActive('home'); ?>" href="/Ismano/public/">Home</a></li>
-                <li><a class="nav-link <?php echo navIsActive('services'); ?>" href="/Ismano/public/services">Our Services</a></li>
-                <li><a class="nav-link <?php echo navIsActive('about'); ?>" href="/Ismano/public/about">About Us</a></li>
-                <li><a class="nav-link <?php echo navIsActive('gallery'); ?>" href="/Ismano/public/gallery">Gallery</a></li>
-                <li><a class="nav-link <?php echo navIsActive('blogs'); ?>" href="/Ismano/public/blogs/">Blog <span class="nav-pill">New</span></a></li>
+                <li><a class="nav-link <?php echo navIsActive('home'); ?>" href="/Realestate/public/">Home</a></li>
+                <li><a class="nav-link <?php echo navIsActive('services'); ?>" href="/Realestate/public/services">Our Services</a></li>
+                <li><a class="nav-link <?php echo navIsActive('about'); ?>" href="/Realestate/public/about">About Us</a></li>
+                <li><a class="nav-link <?php echo navIsActive('gallery'); ?>" href="/Realestate/public/gallery">Gallery</a></li>
+                <li><a class="nav-link <?php echo navIsActive('blogs'); ?>" href="/Realestate/public/blogs/">Blog <span class="nav-pill">New</span></a></li>
                 
                 <!-- Store Dropdown -->
                 <li class="nav-item-dropdown">
-                    <a class="nav-link <?php echo navIsActive('store'); ?>" href="/Ismano/public/store/">
+                    <a class="nav-link <?php echo navIsActive('store'); ?>" href="/Realestate/public/store/">
                         <i class="fas fa-store nav-ic" aria-hidden="true"></i> Store
                         <i class="fas fa-chevron-down dropdown-arrow" aria-hidden="true"></i>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-link" href="/Ismano/public/store/"><i class="fas fa-box"></i> All Products</a></li>
-                        <li><a class="dropdown-link" href="/Ismano/public/store/?sort=featured"><i class="fas fa-star"></i> Featured</a></li>
-                        <li><a class="dropdown-link" href="/Ismano/public/store/?sort=price_low"><i class="fas fa-arrow-up-wide-short"></i> Price: Low to High</a></li>
-                        <li><a class="dropdown-link" href="/Ismano/public/store/?sort=price_high"><i class="fas fa-arrow-down-wide-short"></i> Price: High to Low</a></li>
+                        <li><a class="dropdown-link" href="/Realestate/public/store/"><i class="fas fa-box"></i> All Products</a></li>
+                        <li><a class="dropdown-link" href="/Realestate/public/store/?sort=featured"><i class="fas fa-star"></i> Featured</a></li>
+                        <li><a class="dropdown-link" href="/Realestate/public/store/?sort=price_low"><i class="fas fa-arrow-up-wide-short"></i> Price: Low to High</a></li>
+                        <li><a class="dropdown-link" href="/Realestate/public/store/?sort=price_high"><i class="fas fa-arrow-down-wide-short"></i> Price: High to Low</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-link" href="/Ismano/public/client/cart/"><i class="fas fa-shopping-cart"></i> My Cart <span class="cart-badge" id="desktopCartCount"></span></a></li>
+                        <li><a class="dropdown-link" href="/Realestate/public/client/cart/"><i class="fas fa-shopping-cart"></i> My Cart <span class="cart-badge" id="desktopCartCount"></span></a></li>
                     </ul>
                 </li>
                 
-                <li><a class="nav-link <?php echo navIsActive('contact'); ?>" href="/Ismano/public/contact">Contact Us</a></li>
-                <li><a class="nav-link" href="/Ismano/public/auth/login.php">Login</a></li>
+                <li><a class="nav-link <?php echo navIsActive('contact'); ?>" href="/Realestate/public/contact">Contact Us</a></li>
+                <li><a class="nav-link" href="/Realestate/public/auth/login.php">Login</a></li>
             </ul>
         </nav>
 
@@ -116,7 +116,7 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT'])
             </button>
 
             <!-- Cart Icon (Mobile/Tablet) -->
-            <a href="/Ismano/public/client/cart/" class="cart-icon-mobile" id="mobileCartIcon">
+            <a href="/Realestate/public/client/cart/" class="cart-icon-mobile" id="mobileCartIcon">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-count-mobile" id="mobileCartCount">0</span>
             </a>
@@ -130,26 +130,26 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT'])
                         <i class="fas fa-chevron-down user-caret" aria-hidden="true"></i>
                     </button>
                     <div class="user-dropdown" id="userDropdown" role="menu">
-                        <a class="dropdown-item" href="/Ismano/public/profile/" role="menuitem">
+                        <a class="dropdown-item" href="/Realestate/public/profile/" role="menuitem">
                             <i class="fas fa-user" aria-hidden="true"></i> My Profile
                         </a>
                         <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2): ?>
-                        <a class="dropdown-item" href="/Ismano/public/admin/dashboard.php" role="menuitem">
+                        <a class="dropdown-item" href="/Realestate/public/admin/dashboard.php" role="menuitem">
                             <i class="fas fa-gauge-high" aria-hidden="true"></i> Admin Panel
                         </a>
                         <?php endif; ?>
-                        <a class="dropdown-item" href="/Ismano/public/client/cart/" role="menuitem">
+                        <a class="dropdown-item" href="/Realestate/public/client/cart/" role="menuitem">
                             <i class="fas fa-shopping-cart" aria-hidden="true"></i> My Cart
                             <span class="cart-badge" id="dropdownCartCount"></span>
                         </a>
                         <hr class="dropdown-divider">
-                        <a class="dropdown-item dropdown-item--danger" href="/Ismano/public/auth/logout.php" role="menuitem">
+                        <a class="dropdown-item dropdown-item--danger" href="/Realestate/public/auth/logout.php" role="menuitem">
                             <i class="fas fa-arrow-right-from-bracket" aria-hidden="true"></i> Logout
                         </a>
                     </div>
                 </div>
             <?php else: ?>
-                <a href="/Ismano/public/#contact" class="btn btn--primary nav-cta">
+                <a href="/Realestate/public/#contact" class="btn btn--primary nav-cta">
                     <i class="far fa-calendar-check" aria-hidden="true"></i> Book Now
                 </a>
             <?php endif; ?>
@@ -168,7 +168,7 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT'])
 
 <aside class="mobile-drawer" id="mobileDrawer" aria-hidden="true" aria-label="Mobile navigation">
     <div class="drawer-head">
-        <a class="header-brand drawer-brand" href="/Ismano/public/">
+        <a class="header-brand drawer-brand" href="/Realestate/public/">
             <span class="brand-mark" aria-hidden="true">
                 <svg width="34" height="34" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M24 4l3.2 4.1 5-1.7 1.1 5.2 5.2 1.1-1.7 5L46 24l-4.1 3.2 1.7 5-5.2 1.1-1.1 5.2-5-1.7L24 44l-3.2-4.1-5 1.7-1.1-5.2-5.2-1.1 1.7-5L2 24l4.1-3.2-1.7-5 5.2-1.1L10.7 9.4l5 1.7L24 4z" fill="var(--brand-primary,#0D9488)"/>
@@ -188,11 +188,11 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT'])
 
     <nav class="drawer-nav" aria-label="Mobile navigation">
         <ul class="drawer-list" role="list">
-            <li class="drawer-item" style="--i:0"><a class="drawer-link" href="/Ismano/public/"><span>Home</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
-            <li class="drawer-item" style="--i:1"><a class="drawer-link" href="/Ismano/public/services"><span>Our Services</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
-            <li class="drawer-item" style="--i:2"><a class="drawer-link" href="/Ismano/public/about"><span>About Us</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
-            <li class="drawer-item" style="--i:3"><a class="drawer-link" href="/Ismano/public/gallery"><span>Gallery</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
-            <li class="drawer-item" style="--i:4"><a class="drawer-link" href="/Ismano/public/blogs/"><span>Blog</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
+            <li class="drawer-item" style="--i:0"><a class="drawer-link" href="/Realestate/public/"><span>Home</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
+            <li class="drawer-item" style="--i:1"><a class="drawer-link" href="/Realestate/public/services"><span>Our Services</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
+            <li class="drawer-item" style="--i:2"><a class="drawer-link" href="/Realestate/public/about"><span>About Us</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
+            <li class="drawer-item" style="--i:3"><a class="drawer-link" href="/Realestate/public/gallery"><span>Gallery</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
+            <li class="drawer-item" style="--i:4"><a class="drawer-link" href="/Realestate/public/blogs/"><span>Blog</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
             
             <!-- Store Section in Mobile Drawer -->
             <li class="drawer-item drawer-item-parent" style="--i:5">
@@ -201,18 +201,18 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT'])
                     <i class="fas fa-chevron-down drawer-chevron" aria-hidden="true"></i>
                 </button>
                 <ul class="drawer-submenu" id="storeSubmenu">
-                    <li><a class="drawer-sub-link" href="/Ismano/public/store/"><i class="fas fa-box"></i> All Products</a></li>
-                    <li><a class="drawer-sub-link" href="/Ismano/public/store/?sort=featured"><i class="fas fa-star"></i> Featured</a></li>
-                    <li><a class="drawer-sub-link" href="/Ismano/public/store/?sort=price_low"><i class="fas fa-arrow-up-wide-short"></i> Price: Low to High</a></li>
-                    <li><a class="drawer-sub-link" href="/Ismano/public/store/?sort=price_high"><i class="fas fa-arrow-down-wide-short"></i> Price: High to Low</a></li>
+                    <li><a class="drawer-sub-link" href="/Realestate/public/store/"><i class="fas fa-box"></i> All Products</a></li>
+                    <li><a class="drawer-sub-link" href="/Realestate/public/store/?sort=featured"><i class="fas fa-star"></i> Featured</a></li>
+                    <li><a class="drawer-sub-link" href="/Realestate/public/store/?sort=price_low"><i class="fas fa-arrow-up-wide-short"></i> Price: Low to High</a></li>
+                    <li><a class="drawer-sub-link" href="/Realestate/public/store/?sort=price_high"><i class="fas fa-arrow-down-wide-short"></i> Price: High to Low</a></li>
                     <li><hr class="drawer-sub-divider"></li>
-                    <li><a class="drawer-sub-link" href="/Ismano/public/client/cart/"><i class="fas fa-shopping-cart"></i> My Cart <span class="cart-badge" id="mobileDrawerCartCount"></span></a></li>
+                    <li><a class="drawer-sub-link" href="/Realestate/public/client/cart/"><i class="fas fa-shopping-cart"></i> My Cart <span class="cart-badge" id="mobileDrawerCartCount"></span></a></li>
                 </ul>
             </li>
             
-            <li class="drawer-item" style="--i:6"><a class="drawer-link" href="/Ismano/public/contact"><span>Contact Us</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
-            <li class="drawer-item" style="--i:7"><a class="drawer-link" href="/Ismano/public/auth/login.php"><span>Login</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
-            <li class="drawer-item" style="--i:8"><a class="drawer-link" href="/Ismano/public/feedback/"><span>Feedback</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
+            <li class="drawer-item" style="--i:6"><a class="drawer-link" href="/Realestate/public/contact"><span>Contact Us</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
+            <li class="drawer-item" style="--i:7"><a class="drawer-link" href="/Realestate/public/auth/login.php"><span>Login</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
+            <li class="drawer-item" style="--i:8"><a class="drawer-link" href="/Realestate/public/feedback/"><span>Feedback</span><i class="fas fa-arrow-right drawer-arrow" aria-hidden="true"></i></a></li>
         </ul>
     </nav>
 
@@ -226,16 +226,16 @@ $logoExists = isset($_SERVER['DOCUMENT_ROOT'])
                 </div>
             </div>
             <div class="drawer-foot-links">
-                <a href="/Ismano/public/profile/" class="drawer-foot-link"><i class="fas fa-user" aria-hidden="true"></i> My Profile</a>
+                <a href="/Realestate/public/profile/" class="drawer-foot-link"><i class="fas fa-user" aria-hidden="true"></i> My Profile</a>
                 <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] <= 2): ?>
-                <a href="/Ismano/public/admin/dashboard.php" class="drawer-foot-link"><i class="fas fa-gauge-high" aria-hidden="true"></i> Admin Panel</a>
+                <a href="/Realestate/public/admin/dashboard.php" class="drawer-foot-link"><i class="fas fa-gauge-high" aria-hidden="true"></i> Admin Panel</a>
                 <?php endif; ?>
-                <a href="/Ismano/public/client/cart/" class="drawer-foot-link"><i class="fas fa-shopping-cart" aria-hidden="true"></i> My Cart</a>
-                <a href="/Ismano/public/auth/logout.php" class="drawer-foot-link drawer-foot-link--danger"><i class="fas fa-arrow-right-from-bracket" aria-hidden="true"></i> Logout</a>
+                <a href="/Realestate/public/client/cart/" class="drawer-foot-link"><i class="fas fa-shopping-cart" aria-hidden="true"></i> My Cart</a>
+                <a href="/Realestate/public/auth/logout.php" class="drawer-foot-link drawer-foot-link--danger"><i class="fas fa-arrow-right-from-bracket" aria-hidden="true"></i> Logout</a>
             </div>
         <?php else: ?>
             <p class="drawer-foot-tagline">Need precision metalwork or a turnkey fit-out?</p>
-            <a href="/Ismano/public/#contact" class="btn btn--primary drawer-cta"><i class="far fa-calendar-check" aria-hidden="true"></i> Book Now</a>
+            <a href="/Realestate/public/#contact" class="btn btn--primary drawer-cta"><i class="far fa-calendar-check" aria-hidden="true"></i> Book Now</a>
             <a href="tel:<?php echo preg_replace('/\s+/', '', $ismanPhone); ?>" class="drawer-call-link"><i class="fas fa-phone-volume"></i> <?php echo htmlspecialchars($ismanPhone); ?></a>
         <?php endif; ?>
     </div>
@@ -1384,7 +1384,7 @@ body {
 
     /* Update cart count */
     function updateCartCount() {
-        fetch('/Ismano/public/api/store/cart/count.php')
+        fetch('/Realestate/public/api/store/cart/count.php')
             .then(function(res) { return res.json(); })
             .then(function(data) {
                 var count = data.count || 0;

@@ -3,7 +3,7 @@
 
 return [
     'host' => 'localhost',
-    'dbname' => 'ismano_db',
+    'dbname' => 'realestate_db',
     'username' => 'root',
     'password' => 'mysql',
     'charset' => 'utf8mb4'

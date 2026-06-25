@@ -43,14 +43,14 @@ function isStoreActive($current_dir) {
     <div class="sidebar-nav">
         <div class="nav flex-column">
             <!-- Dashboard -->
-            <a href="/Ismano/public/admin/dashboard.php" 
+            <a href="/Realestate/public/admin/dashboard.php" 
                class="nav-link <?php echo $current_page == 'dashboard.php' ? 'active' : ''; ?>">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
 
             <!-- Orders / Sales -->
-            <a href="/Ismano/public/admin/orders/index.php" 
+            <a href="/Realestate/public/admin/orders/index.php" 
                class="nav-link <?php echo isActive('orders', $current_dir, $current_page) ? 'active' : ''; ?>">
                 <i class="fas fa-receipt"></i>
                 <span>Orders</span>
@@ -58,7 +58,7 @@ function isStoreActive($current_dir) {
             </a>
             
             <!-- Enquiries -->
-            <a href="/Ismano/public/admin/enquiries/index.php" 
+            <a href="/Realestate/public/admin/enquiries/index.php" 
                class="nav-link <?php echo isActive('enquiries', $current_dir, $current_page) ? 'active' : ''; ?>">
                 <i class="fas fa-question-circle"></i>
                 <span>Enquiries</span>
@@ -66,35 +66,35 @@ function isStoreActive($current_dir) {
             </a>
             
             <!-- Projects -->
-            <a href="/Ismano/public/admin/projects/index.php" 
+            <a href="/Realestate/public/admin/projects/index.php" 
                class="nav-link <?php echo isActive('projects', $current_dir, $current_page) ? 'active' : ''; ?>">
                 <i class="fas fa-folder-open"></i>
                 <span>Projects</span>
             </a>
             
             <!-- Services -->
-            <a href="/Ismano/public/admin/services/index.php" 
+            <a href="/Realestate/public/admin/services/index.php" 
                class="nav-link <?php echo isActive('services', $current_dir, $current_page) ? 'active' : ''; ?>">
                 <i class="fas fa-cogs"></i>
                 <span>Services</span>
             </a>
             
             <!-- Blog Posts -->
-            <a href="/Ismano/public/admin/blogs/index.php" 
+            <a href="/Realestate/public/admin/blogs/index.php" 
                class="nav-link <?php echo isActive('blogs', $current_dir, $current_page) ? 'active' : ''; ?>">
                 <i class="fas fa-blog"></i>
                 <span>Blog Posts</span>
             </a>
 
             <!-- Gallery Posts -->
-            <a href="/Ismano/public/admin/gallery/index.php" 
+            <a href="/Realestate/public/admin/gallery/index.php" 
                class="nav-link <?php echo isActive('gallery', $current_dir, $current_page) ? 'active' : ''; ?>">
                 <i class="fas fa-images"></i>
                 <span>Gallery</span>
             </a>
             
             <!-- Testimonials -->
-            <a href="/Ismano/public/admin/testimonials/index.php" 
+            <a href="/Realestate/public/admin/testimonials/index.php" 
                class="nav-link <?php echo isActive('testimonials', $current_dir, $current_page) ? 'active' : ''; ?>">
                 <i class="fas fa-star"></i>
                 <span>Testimonials</span>
@@ -110,12 +110,12 @@ function isStoreActive($current_dir) {
                 </a>
                 <div class="collapse <?php echo isStoreActive($current_dir) ? 'show' : ''; ?>" id="storeMenu">
                     <div class="ps-4 mt-2">
-                        <a href="/Ismano/public/admin/store/products/index.php" 
+                        <a href="/Realestate/public/admin/store/products/index.php" 
                            class="nav-link <?php echo $current_dir == 'products' ? 'active' : ''; ?>">
                             <i class="fas fa-box"></i>
                             <span>Products</span>
                         </a>
-                        <a href="/Ismano/public/admin/store/categories/index.php" 
+                        <a href="/Realestate/public/admin/store/categories/index.php" 
                            class="nav-link <?php echo $current_dir == 'categories' ? 'active' : ''; ?>">
                             <i class="fas fa-tags"></i>
                             <span>Categories</span>
@@ -127,21 +127,21 @@ function isStoreActive($current_dir) {
             <hr>
             
             <!-- Profile -->
-            <a href="/Ismano/public/profile/admin/" 
+            <a href="/Realestate/public/profile/admin/" 
                class="nav-link <?php echo $current_page == 'profile.php' ? 'active' : ''; ?>">
                 <i class="fas fa-user-circle"></i>
                 <span>My Profile</span>
             </a>
             
             <!-- Settings -->
-            <a href="/Ismano/public/admin/settings/index.php" 
+            <a href="/Realestate/public/admin/settings/index.php" 
                class="nav-link <?php echo isActive('settings', $current_dir, $current_page) ? 'active' : ''; ?>">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
             
             <!-- Logout -->
-            <a href="/Ismano/public/auth/logout.php" class="nav-link text-danger">
+            <a href="/Realestate/public/auth/logout.php" class="nav-link text-danger">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </a>
@@ -156,7 +156,7 @@ function isStoreActive($current_dir) {
         <strong>New order received</strong>
         <div id="orderToastMsg" class="order-toast-msg"></div>
     </div>
-    <a href="/Ismano/public/admin/orders/index.php" class="order-toast-link">View</a>
+    <a href="/Realestate/public/admin/orders/index.php" class="order-toast-link">View</a>
     <button type="button" class="order-toast-close" aria-label="Dismiss">&times;</button>
 </div>
 
@@ -667,7 +667,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function poll() {
-        fetch('/Ismano/public/api/store/admin/new_orders_count.php', { 
+        fetch('/Realestate/public/api/store/admin/new_orders_count.php', { 
             headers: { 'Accept': 'application/json' } 
         })
         .then(function (r) { return r.json(); })

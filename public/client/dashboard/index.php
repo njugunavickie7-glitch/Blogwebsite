@@ -11,12 +11,12 @@ require_once __DIR__ . '/../../../app/helpers/functions.php';
 
 // Check if logged in
 if (!isLoggedIn()) {
-    redirect('/Ismano/public/auth/login.php');
+    redirect('/Realestate/public/auth/login.php');
 }
 
 // Check if user is client (role_id 3)
 if (!isset($_SESSION['role_id']) || $_SESSION['role_id'] != 3) {
-    redirect('/Ismano/public/auth/login.php');
+    redirect('/Realestate/public/auth/login.php');
 }
 
 $user_id = $_SESSION['user_id'];
@@ -171,25 +171,25 @@ if ($currentHour < 12) {
     <div class="card-body">
         <div class="row">
             <div class="col-4 col-md-3 mb-3">
-                <a href="/Ismano/public/contact.php" class="quick-action">
+                <a href="/Realestate/public/contact.php" class="quick-action">
                     <i class="fas fa-envelope"></i>
                     <span>Contact Us</span>
                 </a>
             </div>
             <div class="col-4 col-md-3 mb-3">
-                <a href="/Ismano/public/projects/" class="quick-action">
+                <a href="/Realestate/public/projects/" class="quick-action">
                     <i class="fas fa-folder-open"></i>
                     <span>Browse Projects</span>
                 </a>
             </div>
             <div class="col-4 col-md-3 mb-3">
-                <a href="/Ismano/public/services/" class="quick-action">
+                <a href="/Realestate/public/services/" class="quick-action">
                     <i class="fas fa-cogs"></i>
                     <span>Our Services</span>
                 </a>
             </div>
             <div class="col-4 col-md-3 mb-3">
-                <a href="/Ismano/public/blogs/" class="quick-action">
+                <a href="/Realestate/public/blogs/" class="quick-action">
                     <i class="fas fa-blog"></i>
                     <span>Read Blog</span>
                 </a>
@@ -208,7 +208,7 @@ if ($currentHour < 12) {
             <div class="text-center py-4">
                 <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
                 <p class="text-muted">No recent projects found.</p>
-                <a href="/Ismano/public/contact.php" class="btn btn-primary">Start a Project</a>
+                <a href="/Realestate/public/contact.php" class="btn btn-primary">Start a Project</a>
             </div>
         <?php else: ?>
             <?php foreach ($recentProjects as $project): ?>
@@ -218,7 +218,7 @@ if ($currentHour < 12) {
                         <br>
                         <small class="text-muted"><?php echo date('M d, Y', strtotime($project['created_at'])); ?></small>
                     </div>
-                    <a href="/Ismano/public/projects/readmore.php?id=<?php echo $project['id']; ?>" class="btn btn-sm btn-outline-primary">
+                    <a href="/Realestate/public/projects/readmore.php?id=<?php echo $project['id']; ?>" class="btn btn-sm btn-outline-primary">
                         View <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>

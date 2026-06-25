@@ -2,11 +2,11 @@
 // app/config/app.php
 
 return [
-    'app_name' => 'Ismano',
-    'app_url' => 'http://localhost/Ismano',
+    'app_name' => 'Realestate',
+    'app_url' => 'http://localhost/Realestate',
     'debug' => true,
     'timezone' => 'UTC',
-    'session_name' => 'ismano_session',
+    'session_name' => 'realestate_session',
     
     // Security
     'hash_cost' => 12,

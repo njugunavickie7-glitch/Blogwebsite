@@ -203,7 +203,7 @@ document.querySelectorAll('.add-to-cart').forEach(button => {
         const productId = this.dataset.product;
         
         try {
-            const response = await fetch('/Ismano/public/api/cart/add.php', {
+            const response = await fetch('/Realestate/public/api/cart/add.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ product_id: productId, quantity: 1 })
@@ -216,7 +216,7 @@ document.querySelectorAll('.add-to-cart').forEach(button => {
                 updateCartCount();
             } else if (data.require_login) {
                 if (confirm('Please login to add items to cart. Go to login page?')) {
-                    window.location.href = '/Ismano/public/auth/login.php?redirect=' + encodeURIComponent(window.location.pathname);
+                    window.location.href = '/Realestate/public/auth/login.php?redirect=' + encodeURIComponent(window.location.pathname);
                 }
             } else {
                 showToast(data.message || 'Failed to add item', 'error');
@@ -237,7 +237,7 @@ function showToast(message, type = 'success') {
 }
 
 function updateCartCount() {
-    fetch('/Ismano/public/api/cart/count.php')
+    fetch('/Realestate/public/api/cart/count.php')
         .then(res => res.json())
         .then(data => {
             const cartCount = document.querySelector('.cart-count');

@@ -6,8 +6,8 @@
 
 if (!defined('BASE_URL')) {
     // Web path to the /public folder. Centralise here; change once if the
-    // app ever moves. (Matches the hardcoded /Ismano/public used elsewhere.)
-    define('BASE_URL', '/Ismano/public');
+    // app ever moves. (Matches the hardcoded /Realestate/public used elsewhere.)
+    define('BASE_URL', '/Realestate/public');
 }
 
 /* ====================================================================

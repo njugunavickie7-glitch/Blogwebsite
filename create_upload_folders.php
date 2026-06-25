@@ -1,11 +1,11 @@
 <?php
 // create_upload_folders.php
 $directories = [
-    $_SERVER['DOCUMENT_ROOT'] . '/Ismano/public/uploads/',
-    $_SERVER['DOCUMENT_ROOT'] . '/Ismano/public/uploads/services/',
-    $_SERVER['DOCUMENT_ROOT'] . '/Ismano/public/uploads/services/covers/',
-    $_SERVER['DOCUMENT_ROOT'] . '/Ismano/public/uploads/services/sections/',
-    $_SERVER['DOCUMENT_ROOT'] . '/Ismano/public/uploads/services/gallery/'
+    $_SERVER['DOCUMENT_ROOT'] . '/Realestate/public/uploads/',
+    $_SERVER['DOCUMENT_ROOT'] . '/Realestate/public/uploads/services/',
+    $_SERVER['DOCUMENT_ROOT'] . '/Realestate/public/uploads/services/covers/',
+    $_SERVER['DOCUMENT_ROOT'] . '/Realestate/public/uploads/services/sections/',
+    $_SERVER['DOCUMENT_ROOT'] . '/Realestate/public/uploads/services/gallery/'
 ];
 
 foreach ($directories as $dir) {

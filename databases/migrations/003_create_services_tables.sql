@@ -1,5 +1,5 @@
--- Active: 1780050571987@@127.0.0.1@3306@ismano_db
-USE ismano_db;
+-- Active: 1780050571987@@127.0.0.1@3306@realestate_db
+USE realestate_db;
 
 -- Create services table
 CREATE TABLE IF NOT EXISTS services (
